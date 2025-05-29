@@ -2,17 +2,35 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import path, include
 from ninja import NinjaAPI
+from pydantic import ValidationError
 from apps.tenants.api.v1 import tenant_v1_router, license_v1_router
+from config.core.exception.exception_base import ExceptionBase
+from config.core.custom_api import CustomNinjaAPI
 
-api = NinjaAPI(
+api = CustomNinjaAPI(
     version="1.0",
     title="Portal Sara API",
-    docs_url="/docs",         # Swagger UI
-    openapi_url="/openapi.json"  # JSON da especificação
+    docs_url="/docs",         
+    openapi_url="/openapi.json",
 )
+
+# region Exception Handler
+@api.exception_handler(ExceptionBase)
+def service_unavailable(request, exc):
+    return api.create_response(
+        request,
+        {"message": exc.message},
+        status=exc.status_code,
+    )
+
+@api.exception_handler(ValidationError)
+def validation_errors(request, exc):
+    return HttpResponse("Invalid input", status=422)
+# endregion
 
 api.add_router("/tenants", tenant_v1_router)
 api.add_router("/licenses", license_v1_router)
