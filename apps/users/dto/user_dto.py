@@ -12,7 +12,6 @@ class UserCreateRequest(Schema):
 
 
 class UserResponse(Schema):
-    """DTO para retornar dados do usuário."""
     id: int
     username: str
     email: EmailStr
@@ -29,11 +28,9 @@ class UserResponse(Schema):
 
 
 class UserCreateResponse(UserResponse):
-    """Response para criação de usuário."""
     pass 
 
 class UserUpdateRequest(Schema):
-    """DTO para atualização parcial do usuário."""
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     first_name: Optional[str] = None
