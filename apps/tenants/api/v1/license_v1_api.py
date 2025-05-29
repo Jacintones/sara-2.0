@@ -2,7 +2,7 @@ from ninja import Router
 from apps.tenants.service.license_service import LicenseService
 from apps.tenants.dto.license_dto import LicenseCreateRequest, LicenseCreatedResponse
 
-license_v1_router = Router()  
+license_v1_router = Router(tags=["Licenses"])
 service = LicenseService()
 
 @license_v1_router.post("/licenses", response=LicenseCreatedResponse)

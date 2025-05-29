@@ -88,7 +88,8 @@ TENANT_APPS = [
 ]
 
 # Django requer que estas estejam em INSTALLED_APPS também:
-INSTALLED_APPS = SHARED_APPS + TENANT_APPS
+INSTALLED_APPS =  SHARED_APPS + TENANT_APPS
+
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------
@@ -263,9 +264,11 @@ TENANT_DOMAIN_MODEL = "tenants.Domain"
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
-
-
-
+# region JWT
+JWT_SECRET_KEY = env("JWT_SECRET_KEY")
+JWT_ALGORITHM = env("JWT_ALGORITHM")
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES = env("JWT_ACCESS_TOKEN_EXPIRE_MINUTES")
+# endregion
 
 # Your stuff...
 # ------------------------------------------------------------------------------

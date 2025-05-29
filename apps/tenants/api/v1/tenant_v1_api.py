@@ -2,7 +2,7 @@ from ninja import Router
 from apps.tenants.dto.tenant_dto import TenantCreateRequest, TenantCreatedResponse
 from apps.tenants.service.tenant_service import TenantService
 
-tenant_v1_router = Router()  
+tenant_v1_router = Router(tags=["Tenants"])
 service = TenantService()
 
 @tenant_v1_router.post("/tenants", response=TenantCreatedResponse)

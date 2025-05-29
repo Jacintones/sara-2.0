@@ -13,9 +13,9 @@ class TenantService:
             return TenantCreatedResponse.model_validate(tenant)
         except Exception as e:
             raise ExceptionBase(
-                type_error=ErrorType.INTERNAL_SERVER_ERROR,
-                status_code=500,
-                message=f"Ocorreu um erro inesperado ao criar o tenant: {str(e)}"
+                type_error=ErrorType.ERROR_CREATE_TENANT,
+                status_code=400,
+                message=f"Erro ao criar tenant: {str(e)}"
             )
 
     @staticmethod
@@ -25,8 +25,8 @@ class TenantService:
             return [TenantCreatedResponse.model_validate(t) for t in tenants]
         except Exception as e:
             raise ExceptionBase(
-                type_error=ErrorType.INTERNAL_SERVER_ERROR,
-                status_code=500,
+                type_error=ErrorType.ERROR_LIST_LICENSES,
+                status_code=400,
                 message=f"Erro ao listar tenants: {str(e)}"
             )
 
