@@ -8,7 +8,7 @@ router = Router(tags=["Auth"])
 repository = UserRepository()
 service = AuthService(repository=repository)
 
-@router.post("/login", response=LoginResponse)
+@router.post("/login", response=LoginResponse, auth=None)
 def login(request, login_data: LoginRequest):
     """Realiza o login do usuário."""
     return service.login(login_data)

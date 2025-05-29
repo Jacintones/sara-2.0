@@ -1,32 +1,43 @@
-from apps.tenants.models import Tenant
-from apps.tenants.dto.tenant_dto import TenantCreateRequest, TenantCreatedResponse
-
+from typing import List
+from apps.tenants.repository.tenant_repository import TenantRepository
+from apps.tenants.models import Tenant, Domain
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
 
 class TenantService:
+    """Serviço para operações com Tenants."""
+    
+    def __init__(self, repository: TenantRepository):
+        self.repository = repository
+        
+    def create_tenant(self, schema_name: str, name: str, domain: str) -> Tenant:
+        """
+        Cria um novo tenant com seu domínio principal.
+        """
+        tenant = self.repository.create_tenant(
+            schema_name=schema_name,
+            name=name
+        )
+        self.repository.create_domain(
+            tenant=tenant,
+            domain=domain,
+            is_primary=True
+        )
+        return tenant
+        
+            
+    def list_tenants(self) -> List[Tenant]:
+        """Lista todos os tenants."""
+        return self.repository.list_tenants()
 
-    @staticmethod
-    def create_tenant(data: TenantCreateRequest) -> TenantCreatedResponse:
-        try:
-            tenant = Tenant.objects.create(**data.model_dump())
-            return TenantCreatedResponse.model_validate(tenant)
-        except Exception as e:
+            
+    def get_tenant(self, schema_name: str) -> Tenant:
+        tenant = self.repository.get_tenant_by_schema(schema_name)
+        if not tenant:
             raise ExceptionBase(
-                type_error=ErrorType.ERROR_CREATE_TENANT,
-                status_code=400,
-                message=f"Erro ao criar tenant: {str(e)}"
+                type_error=ErrorType.ERROR_TENANT_NOT_FOUND,
+                status_code=404,
+                message=f"Tenant com nome: {schema_name}, não encontrado"
             )
-
-    @staticmethod
-    def list_tenants() -> list[TenantCreatedResponse]:
-        try:
-            tenants = Tenant.objects.all()
-            return [TenantCreatedResponse.model_validate(t) for t in tenants]
-        except Exception as e:
-            raise ExceptionBase(
-                type_error=ErrorType.ERROR_LIST_LICENSES,
-                status_code=400,
-                message=f"Erro ao listar tenants: {str(e)}"
-            )
+        return tenant
 

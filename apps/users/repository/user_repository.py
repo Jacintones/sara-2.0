@@ -55,4 +55,22 @@ class UserRepository:
                 status_code=500,
                 message=f"Erro inesperado ao buscar usuário: {e}"
             )
+        
+    def update_user(self, user_id: int, user_data: dict) -> User:
+        try:
+            user = self.get_user_by_id(user_id)
+            for attr, value in user_data.items():
+                setattr(user, attr, value)
+
+            user.save()
+            return user
+        except Exception as e:
+            logger.exception(f"[Exception] Erro inesperado ao atualizar usuário: {e}")
+            raise ExceptionBase(
+                type_error=ErrorType.ERROR_UPDATE_USER,
+                status_code=500,
+                message=f"Erro inesperado ao atualizar usuário: {e}"
+            )
+
+    
 

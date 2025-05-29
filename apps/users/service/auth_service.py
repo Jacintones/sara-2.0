@@ -8,6 +8,8 @@ from config.core.exception.error_type import ErrorType
 from apps.users.dto.auth_dto import LoginRequest, LoginResponse
 from apps.users.repository.user_repository import UserRepository
 from django.db import connection
+from config.core.middleware.tenant_context import get_current_tenant
+from django_tenants.utils import get_public_schema_name
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +23,13 @@ class AuthService:
         """
         Realiza o login do usuário.
         
-        Se o usuário tiver um tenant associado, valida se ele está acessando
-        pelo schema correto. Caso contrário, permite o acesso em qualquer schema.
+        O tenant é gerenciado automaticamente pelo middleware TenantContextMiddleware.
+        Regras:
+        1. No schema público: Permite qualquer login
+        2. Em schemas específicos:
+           - Usuário com tenant: Só acessa seu próprio tenant
+           - Usuário sem tenant: Pode acessar qualquer tenant
+           - Superusuário: Pode acessar qualquer tenant
         """
         logger.info(f"[AuthService] Tentativa de login para o email: {data.email}")
         
@@ -52,39 +59,40 @@ class AuthService:
                     status_code=403,
                     message="Usuário inativo."
                 )
-
-            schema_atual = connection.schema_name
             
-            if user.tenant:
-                if user.tenant.schema_name != schema_atual:
+            current_schema = connection.schema_name
+            if not user.is_superuser and current_schema != get_public_schema_name():
+                current_tenant = get_current_tenant()
+                if user.tenant and user.tenant != current_tenant:
                     logger.warning(
-                        f"[AuthService] Tentativa de acesso com tenant inválido. "
-                        f"Usuario: {user.email}, Schema esperado: {user.tenant.schema_name}, "
-                        f"Schema atual: {schema_atual}"
+                        f"[AuthService] Acesso negado. Usuário: {user.email}, "
+                        f"Tenant do usuário: {user.tenant.name if user.tenant else 'N/A'}, "
+                        f"Tenant atual: {current_tenant.name if current_tenant else 'N/A'}"
                     )
                     raise ExceptionBase(
                         type_error=ErrorType.INVALID_TENANT,
                         status_code=403,
                         message="Usuário não pertence a este tenant."
                     )
-            else:
-                logger.info(f"[AuthService] Usuário {user.email} não possui tenant associado")
-
             expiration = timedelta(days=30 if data.remember_me else 1)
             payload = {
-                "sub": str(user.id), 
-                "email": user.email, 
-                "tenant": schema_atual if user.tenant else None
+                "sub": str(user.id),
+                "email": user.email,
+                "tenant": current_schema,
+                "roles": {
+                    "is_superuser": user.is_superuser,
+                    "is_staff": user.is_staff
+                }
             }
-            
             token = create_access_token(payload, expiration)
-
+            tenant_info = get_current_tenant()
             logger.info(
                 f"[AuthService] Login realizado com sucesso. "
-                f"Usuário: {user.email}, Tenant: {schema_atual if user.tenant else 'N/A'}, "
-                f"Remember Me: {data.remember_me}"
+                f"Usuário: {user.email}, "
+                f"Tenant: {tenant_info.name if tenant_info else 'N/A'}, "
+                f"Schema: {current_schema}, "
+                f"Roles: superuser={user.is_superuser}, staff={user.is_staff}"
             )
-            
             return LoginResponse(
                 access_token=token,
                 user_id=user.id,
@@ -97,7 +105,6 @@ class AuthService:
                 is_staff=user.is_staff,
                 is_superuser=user.is_superuser
             )
-            
         except Exception as e:
             logger.exception(f"[AuthService] Erro inesperado durante o login: {str(e)}")
             raise ExceptionBase(

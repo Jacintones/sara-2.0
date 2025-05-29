@@ -4,10 +4,33 @@ from config.settings import base
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
 from typing import Dict, Optional
+from ninja.security import HttpBearer
 
 SECRET_KEY = base.JWT_SECRET_KEY
 ALGORITHM = base.JWT_ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = base.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+
+class JWTAuth(HttpBearer):
+    def authenticate(self, request, token: str) -> Optional[dict]:
+        """
+        Autentica o token JWT.
+        """
+        try:
+            return verify_token(token)
+        except Exception:
+            raise ExceptionBase(
+                type_error=ErrorType.UNAUTHORIZED_ERROR,
+                status_code=401,
+                message="Acesso não autorizado."
+            )
+
+    def get_missing_token_error(self):
+        """Retorna o erro quando não há token."""
+        return ExceptionBase(
+            type_error=ErrorType.UNAUTHORIZED_ERROR,
+            status_code=401,
+            message="Token não fornecido. Por favor, faça login."
+        )
 
 def create_access_token(
     data: Dict,
@@ -15,21 +38,13 @@ def create_access_token(
 ) -> str:
     """
     Cria um token JWT.
-
-    Args:
-        data: Dados a serem incluídos no token
-        expires_delta: Tempo de expiração do token. Se None, usa 1 dia.
-
-    Returns:
-        str: Token JWT
     """
     to_encode = data.copy()
     
-    # Se não foi passado tempo de expiração, usa 1 dia
     if expires_delta is None:
         expires_delta = timedelta(days=1)
         
-    expire = datetime.utcnow() + expires_delta
+    expire = datetime.now(UTC) + expires_delta
     to_encode.update({"exp": expire})
     
     encoded_jwt = jwt.encode(

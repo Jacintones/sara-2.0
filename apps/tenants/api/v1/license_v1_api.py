@@ -1,9 +1,12 @@
 from ninja import Router
 from apps.tenants.service.license_service import LicenseService
 from apps.tenants.dto.license_dto import LicenseCreateRequest, LicenseCreatedResponse
+from apps.tenants.repository.license_repository import LicenseRepository
 
 license_v1_router = Router(tags=["Licenses"])
-service = LicenseService()
+
+repository = LicenseRepository()
+service = LicenseService(repository=repository)
 
 @license_v1_router.post("/licenses", response=LicenseCreatedResponse)
 def create_license(request, data: LicenseCreateRequest):

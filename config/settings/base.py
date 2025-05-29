@@ -133,6 +133,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
+    "django_tenants.middleware.main.TenantMainMiddleware",  # Deve ser o primeiro
+    "config.core.middleware.tenant_context.TenantContextMiddleware",  # Nosso middleware logo após
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -258,12 +260,12 @@ LOGGING = {
 REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 REDIS_SSL = REDIS_URL.startswith("rediss://")
 
-# django-tenants
+#region django-tenants
 TENANT_MODEL = "tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
-
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
-
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+#endregion
 # region JWT
 JWT_SECRET_KEY = env("JWT_SECRET_KEY")
 JWT_ALGORITHM = env("JWT_ALGORITHM")

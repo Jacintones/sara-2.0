@@ -1,3 +1,4 @@
+from typing import Optional
 from ninja import Schema
 from pydantic import EmailStr
 
@@ -10,7 +11,7 @@ class UserCreateRequest(Schema):
     tenant_id: int | None
 
 
-class UserDTO(Schema):
+class UserResponse(Schema):
     """DTO para retornar dados do usuário."""
     id: int
     username: str
@@ -27,6 +28,21 @@ class UserDTO(Schema):
         from_attributes = True
 
 
-class UserCreateResponse(UserDTO):
+class UserCreateResponse(UserResponse):
     """Response para criação de usuário."""
     pass 
+
+class UserUpdateRequest(Schema):
+    """DTO para atualização parcial do usuário."""
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    tenant_id: Optional[int] = None
+    is_verified: Optional[bool] = None
+    is_active: Optional[bool] = None
+    is_staff: Optional[bool] = None
+    is_superuser: Optional[bool] = None
+
+    class Config:
+        from_attributes = True
