@@ -14,7 +14,6 @@ class UserService:
         self.repository = repository
 
     def create_user(self, user_data: UserCreateRequest) -> UserCreateResponse:
-        """Cria um novo usuário a partir dos dados fornecidos."""
         data = user_data.model_dump()
         data["password"] = make_password(user_data.password)
         
@@ -32,34 +31,28 @@ class UserService:
         return UserCreateResponse.model_validate(user)
     
     def get_user(self, user_id: int) -> UserResponse:
-        """Obtém um usuário pelo ID."""
-        try:
-            user = self.repository.get_user_by_id(user_id)
-            return UserResponse.model_validate(user)
-        except ObjectDoesNotExist:
+        user = self.repository.get_user_by_id(user_id)
+        if not user:
             raise ExceptionBase(
                 type_error=ErrorType.USER_NOT_FOUND,
                 status_code=404,
                 message=f"Usuário com ID {user_id} não encontrado."
             )
-    
+        return UserResponse.model_validate(user)
+
     def get_user_by_email(self, email: str) -> UserResponse:
-        """Obtém um usuário pelo email."""
-        try:
-            user = self.repository.get_user_by_email(email)
-            return UserResponse.model_validate(user)
-        except ObjectDoesNotExist:
+        user = self.repository.get_user_by_email(email)
+        if not user:
             raise ExceptionBase(
                 type_error=ErrorType.USER_NOT_FOUND,
                 status_code=404,
                 message=f"Usuário com email {email} não encontrado."
             )
-    
-    def update_user(self, user_id: int, data: UserUpdateRequest) -> UserResponse:
-        """Atualiza um usuário com os dados fornecidos."""
-        updated_user = self.user_repository.update_user(user_id, data.model_dump(exclude_unset=True))
-        return UserResponse.model_validate(updated_user)
+        return UserResponse.model_validate(user)
 
+    def update_user(self, user_id: int, data: UserUpdateRequest) -> UserResponse:
+        updated_user = self.repository.update_user(user_id, data.model_dump(exclude_unset=True))
+        return UserResponse.model_validate(updated_user)
 
     def verify_user(self, user_id: int) -> UserResponse:
         user = self.get_user(user_id)
