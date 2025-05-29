@@ -1,25 +1,20 @@
 from django.contrib.auth.hashers import make_password
-from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse
+from django.core.exceptions import ObjectDoesNotExist
+from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserDTO
 from apps.users.models import User
 from apps.users.repository.user_repository import UserRepository
+from apps.tenants.models import Tenant
 from config.core.exception.error_type import ErrorType
 from config.core.exception.exception_base import ExceptionBase
-from apps.tenants.models import Tenant
-from django.core.exceptions import ObjectDoesNotExist
 
 class UserService:
     """Serviço para gerenciamento de usuários."""
-    
-    def __init__(self, user_repository: UserRepository):
-        """
-        Inicializa o serviço com suas dependências.
-        
-        Args:
-            user_repository: Repositório de usuários
-        """
-        self.user_repository = user_repository
+
+    def __init__(self, repository: UserRepository):
+        self.repository = repository
 
     def create_user(self, user_data: UserCreateRequest) -> UserCreateResponse:
+        """Cria um novo usuário a partir dos dados fornecidos."""
         data = user_data.model_dump()
         data["password"] = make_password(user_data.password)
         
@@ -33,13 +28,29 @@ class UserService:
                     message=f"Tenant com ID {tenant_id} não encontrado."
                 )
 
-        user = self.user_repository.create_user_from_dict(data)
+        user = self.repository.create_user_from_dict(data)
         return UserCreateResponse.model_validate(user)
     
-    def get_user(self, user_id: int) -> UserCreateResponse:
-        user = User.objects.get(id=user_id)
-        return UserCreateResponse.model_validate(user)
+    def get_user(self, user_id: int) -> UserDTO:
+        """Obtém um usuário pelo ID."""
+        try:
+            user = self.repository.get_user_by_id(user_id)
+            return UserDTO.model_validate(user)
+        except ObjectDoesNotExist:
+            raise ExceptionBase(
+                type_error=ErrorType.USER_NOT_FOUND,
+                status_code=404,
+                message=f"Usuário com ID {user_id} não encontrado."
+            )
     
-    def get_user_by_email(self, email: str) -> UserCreateResponse:
-        user = self.user_repository.get_user_by_email(email)
-        return UserCreateResponse.model_validate(user)
+    def get_user_by_email(self, email: str) -> UserDTO:
+        """Obtém um usuário pelo email."""
+        try:
+            user = self.repository.get_user_by_email(email)
+            return UserDTO.model_validate(user)
+        except ObjectDoesNotExist:
+            raise ExceptionBase(
+                type_error=ErrorType.USER_NOT_FOUND,
+                status_code=404,
+                message=f"Usuário com email {email} não encontrado."
+            )

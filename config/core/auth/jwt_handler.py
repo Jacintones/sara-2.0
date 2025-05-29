@@ -3,19 +3,42 @@ from datetime import datetime, timedelta, UTC
 from config.settings import base
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
+from typing import Dict, Optional
 
 SECRET_KEY = base.JWT_SECRET_KEY
 ALGORITHM = base.JWT_ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = base.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
+def create_access_token(
+    data: Dict,
+    expires_delta: Optional[timedelta] = None
+) -> str:
+    """
+    Cria um token JWT.
+
+    Args:
+        data: Dados a serem incluídos no token
+        expires_delta: Tempo de expiração do token. Se None, usa 1 dia.
+
+    Returns:
+        str: Token JWT
+    """
     to_encode = data.copy()
-    expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({
-        "exp": expire,
-        "type": "access"  
-    })
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    
+    # Se não foi passado tempo de expiração, usa 1 dia
+    if expires_delta is None:
+        expires_delta = timedelta(days=1)
+        
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    
+    encoded_jwt = jwt.encode(
+        to_encode,
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+    
+    return encoded_jwt
 
 def create_refresh_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from django.db import IntegrityError
 from apps.users.models import User
 from config.core.exception.exception_base import ExceptionBase

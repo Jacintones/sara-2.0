@@ -10,7 +10,8 @@ class UserCreateRequest(Schema):
     tenant_id: int | None
 
 
-class UserCreateResponse(Schema):
+class UserDTO(Schema):
+    """DTO para retornar dados do usuário."""
     id: int
     username: str
     email: EmailStr
@@ -23,4 +24,9 @@ class UserCreateResponse(Schema):
     is_superuser: bool
 
     class Config:
-            from_attributes = True 
+        from_attributes = True
+
+
+class UserCreateResponse(UserDTO):
+    """Response para criação de usuário."""
+    pass 

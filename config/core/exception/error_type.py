@@ -17,5 +17,7 @@ class ErrorType(Enum):
     ERROR_CREATE_USER = "Erro ao criar usuário"
     ERROR_GET_USER = "Erro ao buscar usuário"
     TENANT_NOT_FOUND = "Tenant não encontrado"
-
+    ERROR_LOGIN = "Erro ao realizar login"
+    INACTIVE_USER = "Usuário inativo"
+    INVALID_TENANT = "Tenant inválido"
 
