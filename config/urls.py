@@ -14,8 +14,8 @@ from apps.tenants.api.v1 import tenant_v1_router, license_v1_router
 from apps.accounts.api.v1 import auth_router
 from config.core.exception.exception_base import ExceptionBase
 from config.core.custom_api import CustomNinjaAPI
-from config.core.auth.jwt_handler import JWTAuth
 from config.core.exception.error_type import ErrorType
+from apps.accounts.auth.jwt_handler import JWTAuth
 
 api = NinjaAPI(
     version="1.0",

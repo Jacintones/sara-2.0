@@ -2,7 +2,6 @@ from datetime import timedelta
 import logging
 from django.contrib.auth.hashers import check_password
 from apps.users.models import User
-from config.core.auth.jwt_handler import create_access_token
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
 from apps.users.repository.user_repository import UserRepository
@@ -12,6 +11,7 @@ from django_tenants.utils import get_public_schema_name
 
 from apps.accounts.dto.auth_dto import LoginRequest
 from apps.accounts.dto.auth_dto import LoginResponse
+from apps.accounts.auth.jwt_handler import create_access_token
 
 logger = logging.getLogger(__name__)
 

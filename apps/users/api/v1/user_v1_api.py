@@ -4,7 +4,7 @@ from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserR
 from apps.users.service.user_service import UserService
 from apps.users.repository.user_repository import UserRepository
 from apps.users.enums.role_enum import RoleEnum
-from config.core.auth.role_checker import check_role
+from apps.accounts.auth.role_checker import check_role
 
 router = Router(tags=["Usuários"])
 
