@@ -9,20 +9,23 @@ class RoleEnum(str, Enum):
     @classmethod
     def has_role(cls, user, role) -> bool:
         """
-        Verifica se o usuário tem o role especificado.
-        
+        Verifica se o usuário tem a role especificada.
+
         Hierarquia:
-        - SUPER_ADMIN: Acesso total (desenvolvedores, suporte)
-        - ADMIN: Administrador da instituição (coordenadores, gestores)
-        - USER: Usuário comum (servidores, colaboradores)
+        - SUPER_ADMIN → tudo
+        - ADMIN → ADMIN e USER
+        - USER → apenas USER
         """
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
+            return False
+
         if user.is_superuser:
-            return True
-            
+            return True 
+
         if role == cls.ADMIN:
             return user.is_staff
-            
+
         if role == cls.USER:
-            return True
-            
-        return False  
+            return True  
+
+        return False

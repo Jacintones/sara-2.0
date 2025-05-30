@@ -85,7 +85,6 @@ SHARED_APPS = [
 
 TENANT_APPS = [
     "apps.victims",
-    "apps.fonar",
 ]
 
 # Django requer que estas estejam em INSTALLED_APPS também:

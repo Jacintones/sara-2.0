@@ -1,13 +1,14 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from ninja import Schema
+from pydantic import EmailStr
 
-class LoginRequest(BaseModel):
+class LoginRequest(Schema):
     email: EmailStr
     password: str
     remember_me: bool = False
 
 
-class LoginResponse(BaseModel):
+class LoginResponse(Schema):
     access_token: str
     user_id: int
     email: str

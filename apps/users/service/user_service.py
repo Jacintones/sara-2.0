@@ -3,10 +3,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest
 from apps.users.models import User
 from apps.users.repository.user_repository import UserRepository
-from apps.tenants.models import Tenant
+from apps.users.validators.user_validator import UserValidator
 from config.core.exception.error_type import ErrorType
 from config.core.exception.exception_base import ExceptionBase
-from utils.validators import BusinessValidator
+
 
 class UserService:
     """Serviço para gerenciamento de usuários."""
@@ -15,39 +15,11 @@ class UserService:
         self.repository = repository
 
     def create_user(self, user_data: UserCreateRequest) -> UserCreateResponse:
+        UserValidator.validate_user_creation(user_data)
+        
         data = user_data.model_dump()
-        if not BusinessValidator.validate_email(user_data.email):
-            raise ExceptionBase(
-                type_error=ErrorType.INVALID_EMAIL,
-                status_code=400,
-                message="O email é inválido."
-            )
-
-        senha_valida, erro = BusinessValidator.validate_password(user_data.password)
-        if not senha_valida:
-            raise ExceptionBase(
-                type_error=ErrorType.INVALID_PASSWORD,
-                status_code=400,
-                message=erro or "A senha é inválida."
-            )
-
         data["password"] = make_password(user_data.password)
-        is_superuser = data.get("is_superuser", False)
-        if not is_superuser:
-            tenant_id = data.get("tenant_id")
-            if tenant_id is None:
-                raise ExceptionBase(
-                    type_error=ErrorType.TENANT_REQUIRED,
-                    status_code=400,
-                    message="A tenant é obrigatório para usuários não superusuários."
-                )
-            if not Tenant.objects.filter(id=tenant_id).exists():
-                raise ExceptionBase(
-                    type_error=ErrorType.TENANT_NOT_FOUND,
-                    status_code=400,
-                    message=f"Tenant com ID {tenant_id} não encontrado."
-                )
-            
+        
         user = self.repository.create_user_from_dict(data)
         return UserCreateResponse.model_validate(user)
 
@@ -72,11 +44,15 @@ class UserService:
         return UserResponse.model_validate(user)
 
     def update_user(self, user_id: int, data: UserUpdateRequest) -> UserResponse:
-        updated_user = self.repository.update_user(user_id, data.model_dump(exclude_unset=True))
-        return UserResponse.model_validate(updated_user)
+        UserValidator.validate_user_update(data)
+        user = self.get_user(user_id)
+
+        user = self.repository.update_user(user_id, data.model_dump(exclude_unset=True))
+        return UserResponse.model_validate(user)
 
     def verify_user(self, user_id: int) -> UserResponse:
         user = self.get_user(user_id)
+
         self.repository.update_user(user_id, {"is_verified": True})
         user.is_verified = True  
         return UserResponse.model_validate(user)

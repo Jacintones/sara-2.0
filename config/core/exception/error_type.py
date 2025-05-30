@@ -7,6 +7,7 @@ class ErrorType(Enum):
     INVALID_CREDENTIALS = "Credênciais inválidas"
     UNAUTHORIZED = "Acesso não autorizado"
     NAME_NONE = "Nome é obrigatório"
+    ERROR_LOGIN = "Erro ao fazer login"
     # Erros de Usuário
     EMAIL_NOT_FOUND = "E-mail não encontrado"
     INACTIVE_USER = "Usuário inativo"
@@ -14,7 +15,8 @@ class ErrorType(Enum):
     ERROR_UPDATE_USER = "Erro ao atualizar usuário"
     INVALID_EMAIL = "Email inválido"
     INVALID_PASSWORD = "Senha inválida"
-    
+    USER_NOT_FOUND = "Usuário não encontrado"
+    ERROR_GET_USER = "Erro ao buscar usuário"
     # Erros de Tenant
     ERROR_CREATE_TENANT = "Erro ao criar tenant"
     ERROR_CREATE_DOMAIN = "Erro ao criar domínio"

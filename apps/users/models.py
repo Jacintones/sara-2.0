@@ -7,6 +7,7 @@ from django.db import models
 from django.urls import reverse_lazy 
 from django.utils.translation import gettext_lazy as _
 from config.settings import base
+from apps.users.manager import CustomUserManager
 
 class User(AbstractUser):
     username = None
@@ -25,6 +26,7 @@ class User(AbstractUser):
     )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+    objects = CustomUserManager()
 
 class EmailVerification(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
