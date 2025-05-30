@@ -16,14 +16,14 @@ class UserService:
 
     def create_user(self, user_data: UserCreateRequest) -> UserCreateResponse:
         data = user_data.model_dump()
-        if not BusinessValidator.validar_email(user_data.email):
+        if not BusinessValidator.validate_email(user_data.email):
             raise ExceptionBase(
                 type_error=ErrorType.INVALID_EMAIL,
                 status_code=400,
                 message="O email é inválido."
             )
 
-        senha_valida, erro = BusinessValidator.validar_senha(user_data.password)
+        senha_valida, erro = BusinessValidator.validate_password(user_data.password)
         if not senha_valida:
             raise ExceptionBase(
                 type_error=ErrorType.INVALID_PASSWORD,
@@ -39,7 +39,7 @@ class UserService:
                 raise ExceptionBase(
                     type_error=ErrorType.TENANT_REQUIRED,
                     status_code=400,
-                    message="O tenant é obrigatório para usuários não superusuários."
+                    message="A tenant é obrigatório para usuários não superusuários."
                 )
             if not Tenant.objects.filter(id=tenant_id).exists():
                 raise ExceptionBase(

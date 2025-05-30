@@ -6,7 +6,7 @@ class ErrorType(Enum):
     TOKEN_EXPIRED = "Token expirado"
     INVALID_CREDENTIALS = "Credênciais inválidas"
     UNAUTHORIZED = "Acesso não autorizado"
-    
+    NAME_NONE = "Nome é obrigatório"
     # Erros de Usuário
     EMAIL_NOT_FOUND = "E-mail não encontrado"
     INACTIVE_USER = "Usuário inativo"

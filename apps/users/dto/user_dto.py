@@ -11,7 +11,6 @@ class UserCreateRequest(Schema):
     is_staff: bool
     tenant_id: int | None
 
-
 class UserResponse(Schema):
     id: int
     email: EmailStr

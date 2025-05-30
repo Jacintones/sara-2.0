@@ -11,7 +11,7 @@ router = Router(tags=["Usuários"])
 repository = UserRepository()
 service = UserService(repository=repository)
 
-@router.post("/", response={201: UserCreateResponse, 400: dict, 403: dict}, auth=None)
+@router.post("/", response={201: UserCreateResponse, 400: dict, 403: dict})
 @check_role([RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN])
 def create_user(request, user_data: UserCreateRequest):
     """

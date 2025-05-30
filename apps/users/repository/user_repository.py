@@ -9,11 +9,9 @@ logger = logging.getLogger(__name__)
 
 class UserRepository:
     """Repository para operações com usuários."""
-    
     def create_user_from_dict(self, data: dict) -> User:
         try:
-            user = User.objects.create(**data)
-            return user
+            return User.objects.create(**data)
         except Exception as e:
             logger.exception(f"[Exception] Erro inesperado ao criar usuário: {e}")
             raise ExceptionBase(
