@@ -2,7 +2,7 @@ import re
 from typing import Optional
 from datetime import datetime
 from utils.validation_patterns import (
-    EMAIL_PATTERN, NOME_PATTERN, TELEFONE_PATTERN, CEP_PATTERN,
+    EMAIL_PATTERN, TELEFONE_PATTERN, CEP_PATTERN,
     CNPJ_LENGTH, CPF_LENGTH, CEP_LENGTH, RG_MIN_LENGTH, RG_MAX_LENGTH,
     NOME_MIN_WORDS, SENHA_MIN_LENGTH, DATA_FORMAT_DEFAULT,
     SPECIAL_CHARS, DDD_MIN, DDD_MAX, VALIDAR_SENHA_FORTE
@@ -113,13 +113,6 @@ class BusinessValidator:
     def validate_rg(rg: str) -> bool:
         rg = remove_mascara(rg)
         return rg.isdigit() and RG_MIN_LENGTH <= len(rg) <= RG_MAX_LENGTH
-
-    @staticmethod
-    def validate_name(name: str) -> bool:
-        name = ' '.join(name.split())
-        if len(name.split()) < NOME_MIN_WORDS:
-            return False
-        return bool(re.match(NOME_PATTERN, name))
 
     @staticmethod
     def validate_password(password: str, min_length: int = SENHA_MIN_LENGTH) -> tuple[bool, Optional[str]]:

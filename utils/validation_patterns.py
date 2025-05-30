@@ -4,7 +4,6 @@ Constantes para validação de dados.
 
 # Padrões de Regex
 EMAIL_PATTERN = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-NOME_PATTERN = r'^[A-Za-zÀ-ÿ\s]+$'
 TELEFONE_PATTERN = r'^\d{10,11}$'
 CEP_PATTERN = r'^\d{8}$'
 

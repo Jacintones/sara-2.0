@@ -86,17 +86,6 @@ class TestBusinessValidator(TestCase):
         self.assertFalse(self.validator.validar_rg('abc'))
         self.assertFalse(self.validator.validar_rg(''))
 
-    def test_validar_nome(self):
-        # Nomes válidos
-        self.assertTrue(self.validator.validar_nome('João Silva'))
-        self.assertTrue(self.validator.validar_nome('Maria da Silva'))
-        self.assertTrue(self.validator.validar_nome('José dos Santos'))
-        
-        # Nomes inválidos
-        self.assertFalse(self.validator.validar_nome('João'))  # Sem sobrenome
-        self.assertFalse(self.validator.validar_nome('João 123'))  # Com números
-        self.assertFalse(self.validator.validar_nome(''))
-
     def test_validar_senha(self):
         # Senhas válidas
         valido, msg = self.validator.validar_senha('Abc123@xyz')

@@ -22,10 +22,8 @@ class AuthService:
 
     def login(self, data: LoginRequest) -> LoginResponse:
         logger.info(f"[AuthService] Tentativa de login para o email: {data.email}")
-        
         try:
             user = self.repository.get_user_by_email(data.email)
-
             if not user:
                 logger.warning(f"[AuthService] Email não encontrado: {data.email}")
                 raise ExceptionBase(
@@ -33,7 +31,6 @@ class AuthService:
                     status_code=401,
                     message="E-mail não encontrado."
                 )
-
             if not check_password(data.password, user.password):
                 logger.warning(f"[AuthService] Senha inválida para o usuário: {user.email}")
                 raise ExceptionBase(
@@ -41,7 +38,6 @@ class AuthService:
                     status_code=401,
                     message="Senha inválida."
                 )
-
             if not user.is_active:
                 logger.warning(f"[AuthService] Tentativa de login de usuário inativo: {user.email}")
                 raise ExceptionBase(
@@ -49,7 +45,6 @@ class AuthService:
                     status_code=403,
                     message="Usuário inativo."
                 )
-            
             current_schema = connection.schema_name
             if not user.is_superuser and current_schema != get_public_schema_name():
                 current_tenant = get_current_tenant()
