@@ -1,6 +1,6 @@
 from ninja import Router
-from apps.users.dto.auth_dto import LoginRequest, LoginResponse
-from apps.users.service.auth_service import AuthService
+from apps.accounts.dto.auth_dto import LoginRequest, LoginResponse
+from apps.accounts.service.auth_service import AuthService
 from apps.users.repository.user_repository import UserRepository
 from ninja.errors import AuthenticationError
 from config.core.exception.error_type import ErrorType

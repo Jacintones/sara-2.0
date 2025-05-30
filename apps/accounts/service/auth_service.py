@@ -5,32 +5,22 @@ from apps.users.models import User
 from config.core.auth.jwt_handler import create_access_token
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
-from apps.users.dto.auth_dto import LoginRequest, LoginResponse
 from apps.users.repository.user_repository import UserRepository
 from django.db import connection
 from config.core.middleware.tenant_context import get_current_tenant
 from django_tenants.utils import get_public_schema_name
 
+from apps.accounts.dto.auth_dto import LoginRequest
+from apps.accounts.dto.auth_dto import LoginResponse
+
 logger = logging.getLogger(__name__)
 
 class AuthService:
     """Serviço para autenticação de usuários."""
-
     def __init__(self, repository: UserRepository):
         self.repository = repository
 
     def login(self, data: LoginRequest) -> LoginResponse:
-        """
-        Realiza o login do usuário.
-        
-        O tenant é gerenciado automaticamente pelo middleware TenantContextMiddleware.
-        Regras:
-        1. No schema público: Permite qualquer login
-        2. Em schemas específicos:
-           - Usuário com tenant: Só acessa seu próprio tenant
-           - Usuário sem tenant: Pode acessar qualquer tenant
-           - Superusuário: Pode acessar qualquer tenant
-        """
         logger.info(f"[AuthService] Tentativa de login para o email: {data.email}")
         
         try:
@@ -93,6 +83,12 @@ class AuthService:
                 f"Schema: {current_schema}, "
                 f"Roles: superuser={user.is_superuser}, staff={user.is_staff}"
             )
+            redirect_url = None
+            if user.tenant:
+                domain_obj = user.tenant.domains.first()
+                if domain_obj:
+                    redirect_url = f"https://{domain_obj.domain}"
+
             return LoginResponse(
                 access_token=token,
                 user_id=user.id,
@@ -103,7 +99,8 @@ class AuthService:
                 is_verified=user.is_verified,
                 is_active=user.is_active,
                 is_staff=user.is_staff,
-                is_superuser=user.is_superuser
+                is_superuser=user.is_superuser,
+                redirect_url=redirect_url 
             )
         except Exception as e:
             logger.exception(f"[AuthService] Erro inesperado durante o login: {str(e)}")

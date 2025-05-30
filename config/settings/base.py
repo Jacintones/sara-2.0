@@ -69,7 +69,7 @@ SHARED_APPS = [
     "django_tenants",  
     "apps.users",
     "apps.tenants",  
-    
+    "apps.accounts",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -133,17 +133,19 @@ AUTH_PASSWORD_VALIDATORS = [
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
-    "django_tenants.middleware.main.TenantMainMiddleware",  # Deve ser o primeiro
-    "config.core.middleware.tenant_context.TenantContextMiddleware",  # Nosso middleware logo após
+    "django_tenants.middleware.main.TenantMainMiddleware", 
+    "config.core.middleware.tenant_context.TenantContextMiddleware",  
+    "config.core.middleware.validate_tenant_from_jwt_middleware.MultiTenantAuthMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware", 
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 # STATIC
 # ------------------------------------------------------------------------------

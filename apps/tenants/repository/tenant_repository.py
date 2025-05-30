@@ -6,16 +6,10 @@ from config.core.exception.exception_base import ExceptionBase
 class TenantRepository:
     """Repositório para operações com Tenants."""
     
-    def create_tenant(self, schema_name: str, name: str, paid_until=None, on_trial: bool = False) -> Tenant:
+    def create_tenant(self, data: dict) -> Tenant:
         """Cria um novo tenant."""
         try:
-            tenant = Tenant.objects.create(
-                schema_name=schema_name,
-                name=name,
-                paid_until=paid_until,
-                on_trial=on_trial
-            )
-            return tenant
+            return Tenant.objects.create(**data)
         except Exception as e:
             raise ExceptionBase(
                 type_error=ErrorType.ERROR_CREATE_TENANT,
@@ -24,7 +18,6 @@ class TenantRepository:
             )
         
     def create_domain(self, tenant: Tenant, domain: str, is_primary: bool = True) -> Domain:
-        """Cria um novo domínio para o tenant."""
         try:
             return Domain.objects.create(
                 tenant=tenant,
@@ -61,6 +54,18 @@ class TenantRepository:
                 message=f"Erro ao buscar tenant: {str(e)}"
             )
         
+    def get_domain_by_schema(self, schema_name: str) -> Optional[Domain]:
+        """Obtém um domínio pelo schema_name."""
+        try:
+            return Domain.objects.filter(tenant__schema_name=schema_name).first()
+        except Exception as e:
+            raise ExceptionBase(
+                type_error=ErrorType.ERROR_GET_DOMAIN,
+                status_code=400,
+                message=f"Erro ao buscar domínio: {str(e)}"
+            )
+        
+
     def list_tenants(self) -> List[Tenant]:
         """Lista todos os tenants."""
         try:

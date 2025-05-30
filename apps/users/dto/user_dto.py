@@ -3,17 +3,17 @@ from ninja import Schema
 from pydantic import EmailStr
 
 class UserCreateRequest(Schema):
-    username: str
     first_name: str
     last_name: str
     email: EmailStr
     password: str
+    is_superuser: bool
+    is_staff: bool
     tenant_id: int | None
 
 
 class UserResponse(Schema):
     id: int
-    username: str
     email: EmailStr
     first_name: str
     last_name: str
@@ -31,7 +31,6 @@ class UserCreateResponse(UserResponse):
     pass 
 
 class UserUpdateRequest(Schema):
-    username: Optional[str] = None
     email: Optional[EmailStr] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None

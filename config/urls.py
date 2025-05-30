@@ -8,8 +8,10 @@ from jose import JWTError
 from psycopg import IntegrityError
 from ninja import NinjaAPI
 from ninja.errors import AuthenticationError
-from apps.users.api.v1 import auth_router, user_router
+
+from apps.users.api.v1 import  user_router
 from apps.tenants.api.v1 import tenant_v1_router, license_v1_router
+from apps.accounts.api.v1 import auth_router
 from config.core.exception.exception_base import ExceptionBase
 from config.core.custom_api import CustomNinjaAPI
 from config.core.auth.jwt_handler import JWTAuth

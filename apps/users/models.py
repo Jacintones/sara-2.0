@@ -7,8 +7,11 @@ from django.db import models
 from django.urls import reverse_lazy 
 from django.utils.translation import gettext_lazy as _
 from config.settings import base
+from apps.users.managers import CustomUserManager
+from config.core.mixins.validation_mixins import PersonValidationMixin
 
-class User(AbstractUser):
+class User(AbstractUser, PersonValidationMixin):
+    username = None
     email = models.EmailField(_("email address"), blank=True, unique=True, null=False)
     tenant = models.ForeignKey(
         base.TENANT_MODEL,
@@ -18,12 +21,13 @@ class User(AbstractUser):
         blank=True
     )
     is_verified = models.BooleanField(
-        _("active"),
-        default=False,
-        help_text=_(
-            "Designates whether this user has verified his email. "
-        ),
+    _("email verified"),
+    default=False,
+    help_text=_("Indicates whether the user has confirmed their email address.")
     )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    objects = CustomUserManager()
 
 class EmailVerification(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)

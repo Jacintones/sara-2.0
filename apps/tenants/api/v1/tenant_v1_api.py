@@ -1,5 +1,5 @@
 from ninja import Router
-from apps.tenants.dto.tenant_dto import TenantCreateRequest, TenantCreatedResponse
+from apps.tenants.dto.tenant_dto import TenantCreateRequest, TenantCreatedResponse, TenantListResponse
 from apps.tenants.service.tenant_service import TenantService
 from apps.tenants.repository.tenant_repository import TenantRepository
 
@@ -12,11 +12,11 @@ service = TenantService(repository=repository)
 def create_tenant(request, data: TenantCreateRequest):
     return service.create_tenant(data)
 
-@tenant_v1_router.get("/tenants", response=list[TenantCreatedResponse], auth=None)
+@tenant_v1_router.get("/tenants", response=list[TenantListResponse], auth=None)
 def list_tenants(request):
     return service.list_tenants()
 
-@tenant_v1_router.get("/tenants/{schema_name}", response=TenantCreatedResponse, auth=None)
+@tenant_v1_router.get("/tenants/{schema_name}", response=TenantListResponse, auth=None)
 def get_tenant(request, schema_name: str):
     return service.get_tenant(schema_name)
 
