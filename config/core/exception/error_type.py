@@ -33,4 +33,15 @@ class ErrorType(Enum):
     INVALID_RG = "RG inválido"
     INTEGRTY_ERROR = "Erro de integridade no banco de dados"
 
+    # Erros de Validação
+    ERROR_CREATE_VICTIM = "Erro ao criar vítima"
+    ERROR_GET_VICTIM = "Erro ao buscar vítima"
+    ERROR_LIST_VICTIMS = "Erro ao listar vítimas"
+    ERROR_UPDATE_VICTIM = "Erro ao atualizar vítima"
+    ERROR_DELETE_VICTIM = "Erro ao excluir vítima"
+    ERROR_INVALID_BIRTH_DATE = "Data de nascimento não pode ser futura"
+    ERROR_INVALID_POSTCODE = "CEP inválido"
+    ERROR_INVALID_PHONE = "Telefone inválido"
+    ERROR_INVALID_CPF = "CPF inválido"
+    ERROR_INVALID_RG = "RG inválido"
     

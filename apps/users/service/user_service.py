@@ -46,14 +46,14 @@ class UserService:
     def update_user(self, user_id: int, data: UserUpdateRequest) -> UserResponse:
         UserValidator.validate_user_update(data)
         user = self.get_user(user_id)
-
-        user = self.repository.update_user(user_id, data.model_dump(exclude_unset=True))
-        return UserResponse.model_validate(user)
+        for key, value in data.items():
+            setattr(user, key, value)
+            
+        user_updated = self.repository.update_user(user)
+        return UserResponse.model_validate(user_updated)
 
     def verify_user(self, user_id: int) -> UserResponse:
-        user = self.get_user(user_id)
-
-        self.repository.update_user(user_id, {"is_verified": True})
-        user.is_verified = True  
+        request = UserUpdateRequest(is_verified=True)
+        user = self.update_user(user_id, request)
         return UserResponse.model_validate(user)
 

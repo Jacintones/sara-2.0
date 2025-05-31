@@ -12,6 +12,7 @@ from ninja.errors import AuthenticationError
 from apps.users.api.v1 import  user_router
 from apps.tenants.api.v1 import tenant_v1_router, license_v1_router
 from apps.accounts.api.v1 import auth_router
+from apps.victims.api.v1 import victim_router
 from config.core.exception.exception_base import ExceptionBase
 from config.core.custom_api import CustomNinjaAPI
 from config.core.exception.error_type import ErrorType
@@ -29,6 +30,7 @@ api.add_router("/auth", auth_router)
 api.add_router("/users", user_router)
 api.add_router("/tenants", tenant_v1_router)
 api.add_router("/licenses", license_v1_router)
+api.add_router("/victims", victim_router)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
