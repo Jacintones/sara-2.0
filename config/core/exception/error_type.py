@@ -5,9 +5,10 @@ class ErrorType(Enum):
     INVALID_TOKEN = "invalid_token"
     TOKEN_EXPIRED = "Token expirado"
     INVALID_CREDENTIALS = "Credênciais inválidas"
-    UNAUTHORIZED = "Acesso não autorizado"
     NAME_NONE = "Nome é obrigatório"
     ERROR_LOGIN = "Erro ao fazer login"
+    UNAUTHORIZED_ERROR = "Erro ao fazer login"
+    MAPPING_ERROR = "Erro ao mapear schema para model"
     # Erros de Usuário
     EMAIL_NOT_FOUND = "E-mail não encontrado"
     INACTIVE_USER = "Usuário inativo"
@@ -45,3 +46,6 @@ class ErrorType(Enum):
     ERROR_INVALID_CPF = "CPF inválido"
     ERROR_INVALID_RG = "RG inválido"
     
+    # Erros de Licença
+    ERROR_LICENSE_NOT_FOUND = "Licença não encontrada"
+    ERROR_LICENSE_NOT_ACTIVE = "Licença não está ativa"

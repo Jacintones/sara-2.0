@@ -13,21 +13,20 @@ class Tenant(TenantMixin):
     endereco_comercial = models.CharField(_("Endereço Comercial"), max_length=255, default='', null=False)
     inscricao_estadual = models.CharField(_("Inscrição Estadual"), max_length=255, default='', null=False)
     nome_do_gestor = models.CharField(_("Nome do Gestor"), max_length=255, default='', null=False)
-    rg_gestor = models.CharField(_("RG do Gestor"), max_length=20, default='', null=False)
-    cpf_gestor = models.CharField(_("CPF do Gestor"), max_length=14, default='', null=False)
+    rg_gestor = models.CharField(_("RG do Gestor"), max_length=20, default='', null=False, unique=True)
+    cpf_gestor = models.CharField(_("CPF do Gestor"), max_length=14, default='', null=False, unique=True)
     endereco_residencial = models.CharField(_("Endereço Residencial"), max_length=255, default='', null=False)
     data_nascimento_gestor = models.DateField(_("Data de Nascimento do Gestor"), null=True, blank=True)
     cargo_gestor = models.CharField(_("Cargo do Gestor"), max_length=255, default='', null=False)
     unidade_executora = models.CharField(_("Unidade Executora"), max_length=255, default='', null=False)
     nome_responsavel = models.CharField(_("Nome do Responsável"), max_length=255, default='', null=False)
     funcao_responsavel = models.CharField(_("Função do Responsável"), max_length=255, default='', null=False)
-    rg_responsavel = models.CharField(_("RG do Responsável"), max_length=20, default='', null=False)
-    cpf_responsavel = models.CharField(_("CPF do Responsável"), max_length=14, default='', null=False)
+    rg_responsavel = models.CharField(_("RG do Responsável"), max_length=20, default='', null=False, unique=True)
+    cpf_responsavel = models.CharField(_("CPF do Responsável"), max_length=14, default='', null=False, unique=True)
     auto_create_schema = True  
 
 class Domain(DomainMixin):
     pass
-
 
 class TenantAwareManager(models.Manager):
     def get_queryset(self):

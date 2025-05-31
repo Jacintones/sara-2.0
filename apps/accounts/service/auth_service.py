@@ -6,7 +6,6 @@ from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
 from apps.users.repository.user_repository import UserRepository
 from django.db import connection
-from config.core.middleware.tenant_context import get_current_tenant
 from django_tenants.utils import get_public_schema_name
 
 from apps.accounts.dto.auth_dto import LoginRequest
@@ -45,20 +44,19 @@ class AuthService:
                     status_code=403,
                     message="Usuário inativo."
                 )
-            current_schema = connection.schema_name
-            if not user.is_superuser and current_schema != get_public_schema_name():
-                current_tenant = get_current_tenant()
-                if user.tenant and user.tenant != current_tenant:
-                    logger.warning(
-                        f"[AuthService] Acesso negado. Usuário: {user.email}, "
-                        f"Tenant do usuário: {user.tenant.name if user.tenant else 'N/A'}, "
-                        f"Tenant atual: {current_tenant.name if current_tenant else 'N/A'}"
-                    )
+
+            if user.is_superuser:
+                current_schema = connection.schema_name
+            else:
+                if not user.tenant:
+                    logger.error(f"[AuthService] Usuário {user.email} não possui tenant associado")
                     raise ExceptionBase(
                         type_error=ErrorType.INVALID_TENANT,
                         status_code=403,
-                        message="Usuário não pertence a este tenant."
+                        message="Usuário não possui tenant associado."
                     )
+                current_schema = user.tenant.schema_name
+
             expiration = timedelta(days=30 if data.remember_me else 1)
             payload = {
                 "sub": str(user.id),
@@ -70,11 +68,10 @@ class AuthService:
                 }
             }
             token = create_access_token(payload, expiration)
-            tenant_info = get_current_tenant()
             logger.info(
                 f"[AuthService] Login realizado com sucesso. "
                 f"Usuário: {user.email}, "
-                f"Tenant: {tenant_info.name if tenant_info else 'N/A'}, "
+                f"Tenant: {user.tenant.name if user.tenant else 'N/A'}, "
                 f"Schema: {current_schema}, "
                 f"Roles: superuser={user.is_superuser}, staff={user.is_staff}"
             )

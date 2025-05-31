@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import UUID
 from typing import Optional
 from ninja import Schema
 from apps.victims.enums import (
@@ -35,9 +36,10 @@ class VictimCreateRequest(Schema):
     deficiency_reason: bool
     has_consulted_psychiatrist: bool
     drug_usage: DrugUsage
+    license_key: str
 
 class VictimCreateResponse(Schema):
-    id: int
+    id: UUID
     name: str
     social_name: Optional[str]
     cpf: str
@@ -96,7 +98,7 @@ class VictimUpdateRequest(Schema):
     drug_usage: Optional[DrugUsage]
 
 class VictimUpdateResponse(Schema):
-    id: int
+    id: UUID
     name: str
     social_name: Optional[str]
     cpf: str

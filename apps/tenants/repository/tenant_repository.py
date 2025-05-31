@@ -64,7 +64,7 @@ class TenantRepository:
                 status_code=400,
                 message=f"Erro ao buscar domínio: {str(e)}"
             )
-        
+    
 
     def list_tenants(self) -> List[Tenant]:
         """Lista todos os tenants."""
@@ -75,4 +75,15 @@ class TenantRepository:
                 type_error=ErrorType.ERROR_LIST_TENANTS,
                 status_code=400,
                 message=f"Erro ao listar tenants: {str(e)}"
+            )
+        
+    def get_tenant_by_id(self, tenant_id: int) -> Optional[Tenant]: 
+        """Obtém um tenant pelo id."""
+        try:
+            return Tenant.objects.get(id=tenant_id)
+        except Exception as e:
+            raise ExceptionBase(
+                type_error=ErrorType.ERROR_GET_TENANT,
+                status_code=400,
+                message=f"Erro ao buscar tenant: {str(e)}"
             )

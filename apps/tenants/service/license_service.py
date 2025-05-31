@@ -1,24 +1,36 @@
+import uuid
 from ninja.errors import HttpError
 from apps.tenants.dto.license_dto import LicenseCreateRequest, LicenseCreatedResponse
-from apps.tenants.models import License
 from config.core.exception.error_type import ErrorType
 from config.core.exception.exception_base import ExceptionBase
 from apps.tenants.repository.license_repository import LicenseRepository
+from apps.tenants.repository.tenant_repository import TenantRepository
+from apps.tenants.models import License, Tenant
 
 
 class LicenseService:
     """Serviço para operações com Licenças."""
     
-    def __init__(self, repository: LicenseRepository):
+    def __init__(self, repository: LicenseRepository, tenant_repository: TenantRepository):
         self.repository = repository
+        self.tenant_repository = tenant_repository
 
     def create_license(self, data: LicenseCreateRequest) -> LicenseCreatedResponse:
-        """Cria uma nova licença."""
-        license = self.repository.create_license(
-            tenant_id=data.tenant_id,
-            is_active=data.is_active
+        license_data = data.model_dump()
+        tenant_id = license_data.pop("tenant_id")
+
+        tenant_instance = Tenant.objects.get(id=tenant_id)
+
+        license = License(
+            is_active=license_data.get("is_active", True),
+            tenant=tenant_instance,
+            key=uuid.uuid4()
         )
+
+        self.repository.create_license(license)
+
         return LicenseCreatedResponse.model_validate(license)
+
 
     def list_licenses(self) -> list[LicenseCreatedResponse]:
         """Lista todas as licenças."""

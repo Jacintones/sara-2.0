@@ -29,7 +29,7 @@ def check_role(required_roles: Union[RoleEnum, List[RoleEnum]]):
             
             if not hasattr(request, 'auth') or not request.auth:
                 raise ExceptionBase(
-                    type_error=ErrorType.UNAUTHORIZED,
+                    type_error=ErrorType.UNAUTHORIZED_ERROR,
                     status_code=401,
                     message="Não autenticado"
                 )
@@ -37,7 +37,7 @@ def check_role(required_roles: Union[RoleEnum, List[RoleEnum]]):
             user_roles = request.auth.get('roles', {})
             if not user_roles:
                 raise ExceptionBase(
-                    type_error=ErrorType.UNAUTHORIZED,
+                    type_error=ErrorType.UNAUTHORIZED_ERROR,
                     status_code=401,
                     message="Informações de roles não encontradas"
                 )

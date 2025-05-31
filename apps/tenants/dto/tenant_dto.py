@@ -54,7 +54,6 @@ class TenantListResponse(Schema):
     rg_responsavel: str
     cpf_responsavel: str
     data_nascimento_gestor: Optional[date] = None
-    domain: DomainResponse
     class Config:
         from_attributes = True
 

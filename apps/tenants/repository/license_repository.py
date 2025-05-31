@@ -1,22 +1,16 @@
 from typing import List, Optional
 from apps.tenants.models import License, Tenant
-from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
 
 from config.core.exception.error_type import ErrorType
 from config.core.exception.exception_base import ExceptionBase
 
 class LicenseRepository:
     """Repositório para operações com Licenças."""
-    
-    def create_license(self, tenant_id: int, is_active: bool = True) -> License:
+
+    def create_license(self, license: License) -> License:
         """Cria uma nova licença."""
         try:
-            tenant = Tenant.objects.get(id=tenant_id)
-            license = License.objects.create(
-                tenant=tenant,
-                is_active=is_active
-            )
+            license.save()
             return license
         except Exception as e:
             raise ExceptionBase(

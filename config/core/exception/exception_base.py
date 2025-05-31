@@ -1,3 +1,4 @@
+from ninja import Schema
 from config.core.exception.error_type import ErrorType
 
 class ExceptionBase(Exception):
@@ -8,4 +9,11 @@ class ExceptionBase(Exception):
         self.message = message
         self.details = details or []
 
-        super().__init__(self.message)  # ou apenas `message`
+        super().__init__(self.message) 
+
+
+class ErrorResponse(Schema):
+    title: str
+    message: str
+    status_code: int
+    details: str 

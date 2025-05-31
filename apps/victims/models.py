@@ -24,7 +24,7 @@ class Victim(BaseModel):
     license = models.OneToOneField("tenants.License", verbose_name=_("Licença"), on_delete=models.PROTECT, null=True, blank=True)
     name = models.CharField(_('Nome'), max_length=48)
     social_name = models.CharField(_('Nome Social'), max_length=48, blank=True, null=True)
-    cpf = models.CharField(_('CPF'), max_length=11)
+    cpf = models.CharField(_('CPF'), max_length=14, unique=True)
     birth_date = models.DateField(_('Data de Nascimento (DD/MM/AAAA)'), max_length=60)
     postcode = models.CharField(_('CEP'), max_length=9)
     address = models.CharField(_('Endereço'), max_length=60)

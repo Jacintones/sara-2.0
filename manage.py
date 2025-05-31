@@ -21,8 +21,8 @@ def main():
     # This allows easy placement of apps within the interior
     # sara_portal directory.
     current_path = Path(__file__).parent.resolve()
-    sys.path.append(str(current_path / "sara_portal"))
-    sys.path.append(str(current_path / "sara_portal" / "apps"))
+    sys.path.append(str(current_path))
+    sys.path.append(str(current_path / "apps"))
     execute_from_command_line(sys.argv)
 
 

@@ -55,7 +55,8 @@ def service_unavailable(request, exc: ExceptionBase):
         {
             "title": exc.titulo,
             "message": exc.message,
-            "status_code": exc.status_code
+            "status_code": exc.status_code,
+            "details": exc.details
         },
         status=exc.status_code,
     )

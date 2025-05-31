@@ -5,15 +5,18 @@ from apps.users.service.user_service import UserService
 from apps.users.repository.user_repository import UserRepository
 from apps.users.enums.role_enum import RoleEnum
 from apps.accounts.auth.role_checker import check_role
+from apps.tenants.repository.tenant_repository import TenantRepository
+from config.core.exception.exception_base import ErrorResponse
 
 router = Router(tags=["Usuários"])
 
 repository = UserRepository()
-service = UserService(repository=repository)
+tenant_repository = TenantRepository()
+service = UserService(repository=repository, tenant_repository=tenant_repository)
 
-@router.post("/", response={200: UserCreateResponse, 201: UserCreateResponse, 400: dict, 403: dict})
+@router.post("/", response={201: UserCreateResponse, 400: ErrorResponse, 403: ErrorResponse})
 @check_role([RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN])
-def create_user(request, user_data: UserCreateRequest):
+def create_user(request, user_data: UserCreateRequest) -> UserCreateResponse:
     """
     Cria um novo usuário no sistema.
 
@@ -42,9 +45,10 @@ def create_user(request, user_data: UserCreateRequest):
         - O tenant_id é opcional
         - A senha será automaticamente criptografada
     """
-    return service.create_user(user_data)
+    user = service.create_user(user_data)
+    return 201, user 
 
-@router.get("/{user_id}", response={200: UserResponse, 404: dict}, auth=None)
+@router.get("/{user_id}", response={200: UserResponse, 404: ErrorResponse}, auth=None)
 @check_role([RoleEnum.ADMIN, RoleEnum.USER])
 def get_user(request: HttpRequest, user_id: int) -> UserResponse:
     """
@@ -64,7 +68,7 @@ def get_user(request: HttpRequest, user_id: int) -> UserResponse:
     """
     return service.get_user(user_id)
 
-@router.put("/{user_id}/activate", response={200: UserResponse, 404: dict}, auth=None)
+@router.put("/{user_id}/activate", response={200: UserResponse, 404: ErrorResponse}, auth=None)
 def activate_user(request: HttpRequest, user_id: int) -> UserResponse:
     """
     Ativa um usuário no sistema.

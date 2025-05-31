@@ -133,15 +133,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
-    "django_tenants.middleware.main.TenantMainMiddleware", 
-    "config.core.middleware.tenant_context.TenantContextMiddleware",  
-    "config.core.middleware.validate_tenant_from_jwt_middleware.MultiTenantAuthMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware", 
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_tenants.middleware.main.TenantMainMiddleware",
+    "config.core.middleware.jwt_middleware.JWTAuthMiddleware",
+    "config.core.middleware.tenant_middleware.TenantMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
