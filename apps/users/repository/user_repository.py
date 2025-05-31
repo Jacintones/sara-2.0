@@ -25,13 +25,6 @@ class UserRepository:
     def get_user_by_id(self, user_id: int) -> User:
         try:
             return User.objects.get(id=user_id)
-        except ObjectDoesNotExist:
-            raise ExceptionBase(
-                type_error=ErrorType.USER_NOT_FOUND,
-                status_code=404,
-                message=f"Usuário não encontrado",
-                details=str(e)
-            )
         except Exception as e:
             logger.exception(f"[Exception] Erro inesperado ao buscar usuário: {e}")
             raise ExceptionBase(

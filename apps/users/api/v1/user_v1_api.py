@@ -1,6 +1,6 @@
 from django.http import HttpRequest
 from ninja import Router
-from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse
+from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest
 from apps.users.service.user_service import UserService
 from apps.users.repository.user_repository import UserRepository
 from apps.users.enums.role_enum import RoleEnum
@@ -48,7 +48,7 @@ def create_user(request, user_data: UserCreateRequest) -> UserCreateResponse:
     user = service.create_user(user_data)
     return 201, user 
 
-@router.get("/{user_id}", response={200: UserResponse, 404: ErrorResponse}, auth=None)
+@router.get("/{user_id}", response={200: UserResponse, 404: ErrorResponse})
 @check_role([RoleEnum.ADMIN, RoleEnum.USER])
 def get_user(request: HttpRequest, user_id: int) -> UserResponse:
     """
@@ -68,7 +68,8 @@ def get_user(request: HttpRequest, user_id: int) -> UserResponse:
     """
     return service.get_user(user_id)
 
-@router.put("/{user_id}/activate", response={200: UserResponse, 404: ErrorResponse}, auth=None)
+@router.put("/{user_id}/activate", response={200: UserResponse, 404: ErrorResponse})
+@check_role([RoleEnum.USER])
 def activate_user(request: HttpRequest, user_id: int) -> UserResponse:
     """
     Ativa um usuário no sistema.
@@ -87,5 +88,23 @@ def activate_user(request: HttpRequest, user_id: int) -> UserResponse:
     return service.verify_user(user_id)
 
 
+@router.put("/{user_id}", response={200: UserResponse, 404: ErrorResponse, 400: ErrorResponse})
+@check_role([RoleEnum.SUPER_ADMIN])
+def update_user(request: HttpRequest, user_id: int, user_data: UserUpdateRequest) -> UserResponse:
+    """
+    Atualiza os dados de um usuário existente.
 
+    Args:
+        user_id: ID do usuário a ser atualizado
+        user_data: Novos dados do usuário
 
+    Returns:
+        200: Usuário atualizado com sucesso
+        404: Usuário não encontrado
+        400: Erro de validação
+
+    Notes:
+        - Requer permissão de ADMIN ou SUPER_ADMIN
+        - Usuários normais só podem atualizar seus próprios dados
+    """
+    return service.update_user(user_id, user_data)

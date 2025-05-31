@@ -4,6 +4,8 @@ from apps.users.enums.role_enum import RoleEnum
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
 
+logger = __import__('logging').getLogger(__name__)
+
 def check_role(required_roles: Union[RoleEnum, List[RoleEnum]]):
     """
     Decorator para verificar se o usuário tem os roles necessários.
@@ -26,7 +28,7 @@ def check_role(required_roles: Union[RoleEnum, List[RoleEnum]]):
         @wraps(func)
         def wrapper(request, *args, **kwargs):
             roles = [required_roles] if isinstance(required_roles, RoleEnum) else required_roles
-            
+            logger.info(f"Verificando roles: {roles} para o usuário: {getattr(request, 'auth', None)}")
             if not hasattr(request, 'auth') or not request.auth:
                 raise ExceptionBase(
                     type_error=ErrorType.UNAUTHORIZED_ERROR,

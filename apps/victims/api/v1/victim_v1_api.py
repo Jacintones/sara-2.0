@@ -7,10 +7,10 @@ from config.di import container
 
 router = Router(tags=["Vítimas"])
 
-@router.post("/", response={200: VictimCreateResponse, 201: VictimCreateResponse, 400: dict, 403: dict})
+@router.post("/", response={201: VictimCreateResponse, 400: dict, 403: dict})
 @check_role([RoleEnum.USER])
 def create_victim(request, victim_data: VictimCreateRequest):
-    return container.victim_service().create_victim(victim_data)
+    return container.victim_service().create_victim(victim_data), 201
 
 @router.get("/", response={200: List[VictimResponse], 400: dict, 403: dict})
 def list_victims(request):

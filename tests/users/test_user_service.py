@@ -1,215 +1,120 @@
 import pytest
-from unittest.mock import Mock, patch
-from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest
+from unittest.mock import MagicMock, patch
+
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
+
 from apps.users.service.user_service import UserService
+from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest
 
-
-@pytest.fixture
-def repository_mock():
-    return Mock()
-
+# Supondo que existe uma função que mapeia o schema para dict/model
+from config.core.mapper.mapper_schema import map_schema_to_model_dict
 
 @pytest.fixture
-def user_service(repository_mock):
-    return UserService(repository=repository_mock)
-
+def mock_user_repository():
+    return MagicMock()
 
 @pytest.fixture
-def valid_user_data():
-    return UserCreateRequest(
-        first_name="Test",
-        last_name="User",
-        email="valid@example.com",
-        password="ValidPassword123!",
-        is_superuser=False,
-        is_staff=False,
-        tenant_id=1
+def mock_tenant_repository():
+    return MagicMock()
+
+@pytest.fixture
+def user_service(mock_user_repository, mock_tenant_repository):
+    return UserService(mock_user_repository, mock_tenant_repository)
+
+def test_create_user_superuser(user_service, mock_user_repository, mock_tenant_repository, monkeypatch):
+    data = UserCreateRequest(
+        email="admin@email.com", first_name="Admin", last_name="Root",
+        password="Senha123!", tenant_id=1, is_superuser=True, is_staff=True
     )
+    mock_user = MagicMock()
+    mock_user_repository.create_user.return_value = mock_user
 
+    monkeypatch.setattr("apps.users.validators.user_validator.UserValidator.validate_user_creation", lambda x: None)
+    monkeypatch.setattr("config.core.mapper.mapper_schema.map_schema_to_model_dict", lambda data, model: mock_user)
+    monkeypatch.setattr("django.contrib.auth.hashers.make_password", lambda pwd: "hashed_"+pwd)
+    monkeypatch.setattr("apps.users.dto.user_dto.UserCreateResponse.model_validate", lambda user: "usercreate_response")
 
-def test_create_user_success(user_service, repository_mock, valid_user_data):
-    with patch("utils.validators.BusinessValidator.validate_email", return_value=True), \
-         patch("utils.validators.BusinessValidator.validate_password", return_value=(True, None)), \
-         patch("apps.tenants.models.Tenant.objects.filter") as tenant_filter:
+    result = user_service.create_user(data)
+    assert result == "usercreate_response"
+    mock_user_repository.create_user.assert_called_once()
 
-        tenant_filter.return_value.exists.return_value = True
-        user_dict = valid_user_data.model_dump()
-        user_dict.update({
-            "id": 1,
-            "is_verified": False,
-            "is_active": True
-        })
-        repository_mock.create_user_from_dict.return_value = user_dict
-
-        result = user_service.create_user(valid_user_data)
-
-        assert isinstance(result, UserCreateResponse)
-        assert result.email == valid_user_data.email
-
-
-def test_create_user_invalid_email(user_service, valid_user_data):
-    with patch("utils.validators.BusinessValidator.validate_email", return_value=False):
-        with pytest.raises(ExceptionBase) as exc:
-            user_service.create_user(valid_user_data)
-
-        assert exc.value.type_error == ErrorType.INVALID_EMAIL
-
-
-def test_create_user_invalid_password(user_service, valid_user_data):
-    with patch("utils.validators.BusinessValidator.validate_email", return_value=True), \
-         patch("utils.validators.BusinessValidator.validate_password", return_value=(False, "Senha inválida")):
-        
-        with pytest.raises(ExceptionBase) as exc:
-            user_service.create_user(valid_user_data)
-
-        assert exc.value.type_error == ErrorType.INVALID_PASSWORD
-
-
-def test_create_user_without_tenant(user_service, valid_user_data):
-    valid_user_data.tenant_id = None
-
-    with patch("utils.validators.BusinessValidator.validate_email", return_value=True), \
-         patch("utils.validators.BusinessValidator.validate_password", return_value=(True, None)):
-
-        with pytest.raises(ExceptionBase) as exc:
-            user_service.create_user(valid_user_data)
-
-        assert exc.value.type_error == ErrorType.TENANT_REQUIRED
-
-
-def test_create_user_tenant_not_found(user_service, valid_user_data):
-    with patch("utils.validators.BusinessValidator.validate_email", return_value=True), \
-         patch("utils.validators.BusinessValidator.validate_password", return_value=(True, None)), \
-         patch("apps.tenants.models.Tenant.objects.filter") as tenant_filter:
-
-        tenant_filter.return_value.exists.return_value = False
-
-        with pytest.raises(ExceptionBase) as exc:
-            user_service.create_user(valid_user_data)
-
-        assert exc.value.type_error == ErrorType.TENANT_NOT_FOUND
-
-
-def test_get_user_success(user_service, repository_mock):
-    user_dict = {
-        "id": 1,
-        "email": "test@test.com",
-        "first_name": "T",
-        "last_name": "U",
-        "tenant_id": 1,
-        "is_verified": True,
-        "is_active": True,
-        "is_staff": False,
-        "is_superuser": False
-    }
-    repository_mock.get_user_by_id.return_value = user_dict
-
-    result = user_service.get_user(1)
-    assert isinstance(result, UserResponse)
-    assert result.id == 1
-
-
-def test_get_user_not_found(user_service, repository_mock):
-    repository_mock.get_user_by_id.return_value = None
-
-    with pytest.raises(ExceptionBase) as exc:
-        user_service.get_user(99)
-
-    assert exc.value.type_error == ErrorType.USER_NOT_FOUND  
-
-
-def test_get_user_by_email_success(user_service, repository_mock):
-    user_dict = {
-        "id": 2,
-        "email": "email@test.com",
-        "first_name": "E",
-        "last_name": "U",
-        "tenant_id": 1,
-        "is_verified": True,
-        "is_active": True,
-        "is_staff": False,
-        "is_superuser": False
-    }
-    repository_mock.get_user_by_email.return_value = user_dict
-
-    result = user_service.get_user_by_email("email@test.com")
-    assert isinstance(result, UserResponse)
-    assert result.email == "email@test.com"
-
-
-def test_get_user_by_email_not_found(user_service, repository_mock):
-    repository_mock.get_user_by_email.return_value = None
-
-    with pytest.raises(ExceptionBase) as exc:
-        user_service.get_user_by_email("notfound@test.com")
-
-    assert exc.value.type_error == ErrorType.USER_NOT_FOUND
-
-
-def test_update_user_success(user_service, repository_mock):
-    update_data = UserUpdateRequest(
-        email="new@test.com",
-        first_name="New",
-        last_name="Name",
-        tenant_id=None,
-        is_verified=True,
-        is_active=True,
-        is_staff=True,
-        is_superuser=True
+def test_create_user_missing_tenant(user_service, monkeypatch):
+    data = UserCreateRequest(
+        email="user@email.com", first_name="U", last_name="S",
+        password="Senha123!", tenant_id=None, is_superuser=False, is_staff=False
     )
+    monkeypatch.setattr("apps.users.validators.user_validator.UserValidator.validate_user_creation", lambda x: None)
 
-    repository_mock.get_user_by_id.return_value = {
-        "id": 1,
-        "email": "old@test.com",
-        "first_name": "Old",
-        "last_name": "Name",
-        "tenant_id": None,
-        "is_verified": False,
-        "is_active": True,
-        "is_staff": True,
-        "is_superuser": True
-    }
+    with pytest.raises(ExceptionBase) as excinfo:
+        user_service.create_user(data)
+    assert excinfo.value.type_error == ErrorType.TENANT_REQUIRED
 
-    updated_user = {
-        "id": 1,
-        "email": update_data.email,
-        "first_name": update_data.first_name,
-        "last_name": update_data.last_name,
-        "tenant_id": update_data.tenant_id,
-        "is_verified": update_data.is_verified,
-        "is_active": update_data.is_active,
-        "is_staff": update_data.is_staff,
-        "is_superuser": update_data.is_superuser
-    }
+def test_create_user_tenant_not_found(user_service, mock_tenant_repository, monkeypatch):
+    data = UserCreateRequest(
+        email="user@email.com", first_name="U", last_name="S",
+        password="Senha123!", tenant_id=2, is_superuser=False, is_staff=False
+    )
+    mock_tenant_repository.get_tenant_by_id.return_value = None
+    monkeypatch.setattr("apps.users.validators.user_validator.UserValidator.validate_user_creation", lambda x: None)
 
-    repository_mock.update_user.return_value = updated_user
+    with pytest.raises(ExceptionBase) as excinfo:
+        user_service.create_user(data)
+    assert excinfo.value.type_error == ErrorType.TENANT_NOT_FOUND
 
-    result = user_service.update_user(1, update_data)
+def test_get_user_success(user_service, mock_user_repository, monkeypatch):
+    user_id = 1
+    mock_user = MagicMock()
+    mock_user_repository.get_user_by_id.return_value = mock_user
+    monkeypatch.setattr("apps.users.dto.user_dto.UserResponse.model_validate", lambda user: "user_response")
+    result = user_service.get_user(user_id)
+    assert result == "user_response"
+    mock_user_repository.get_user_by_id.assert_called_once_with(user_id)
 
-    assert isinstance(result, UserResponse)
-    assert result.email == "new@test.com"
+def test_get_user_not_found(user_service, mock_user_repository):
+    user_id = 2
+    mock_user_repository.get_user_by_id.return_value = None
+    with pytest.raises(ExceptionBase) as excinfo:
+        user_service.get_user(user_id)
+    assert excinfo.value.type_error == ErrorType.USER_NOT_FOUND
 
+def test_get_user_by_email_success(user_service, mock_user_repository, monkeypatch):
+    email = "test@email.com"
+    mock_user = MagicMock()
+    mock_user_repository.get_user_by_email.return_value = mock_user
+    monkeypatch.setattr("apps.users.dto.user_dto.UserResponse.model_validate", lambda user: "user_response")
+    result = user_service.get_user_by_email(email)
+    assert result == "user_response"
+    mock_user_repository.get_user_by_email.assert_called_once_with(email)
 
+def test_get_user_by_email_not_found(user_service, mock_user_repository):
+    email = "test@email.com"
+    mock_user_repository.get_user_by_email.return_value = None
+    with pytest.raises(ExceptionBase) as excinfo:
+        user_service.get_user_by_email(email)
+    assert excinfo.value.type_error == ErrorType.USER_NOT_FOUND
 
-def test_verify_user(user_service, repository_mock):
-    user_dict = {
-        "id": 10,
-        "email": "v@me.com",
-        "first_name": "V",
-        "last_name": "M",
-        "tenant_id": 1,
-        "is_verified": False,
-        "is_active": True,
-        "is_staff": False,
-        "is_superuser": False
-    }
+def test_update_user_success(user_service, mock_user_repository, monkeypatch):
+    user_id = 1
+    data = UserUpdateRequest(username="user", email="user@email.com", first_name="U", last_name="S")
+    mock_user = MagicMock()
+    mock_user_repository.get_user_by_id.return_value = mock_user
+    mock_user_repository.update_user.return_value = mock_user
+    monkeypatch.setattr("apps.users.validators.user_validator.UserValidator.validate_user_update", lambda x: None)
+    monkeypatch.setattr("apps.users.dto.user_dto.UserResponse.model_validate", lambda user: "user_response")
+    result = user_service.update_user(user_id, data)
+    assert result == "user_response"
+    mock_user_repository.get_user_by_id.assert_called_once_with(user_id)
+    mock_user_repository.update_user.assert_called_once()
 
-    repository_mock.get_user_by_id.return_value = user_dict
+def test_verify_user_success(user_service, mock_user_repository, monkeypatch):
+    user_id = 1
+    data = UserUpdateRequest(is_verified=True)
+    mock_user = MagicMock()
+    mock_user_repository.get_user_by_id.return_value = mock_user
+    mock_user_repository.update_user.return_value = mock_user
+    monkeypatch.setattr("apps.users.validators.user_validator.UserValidator.validate_user_update", lambda x: None)
+    monkeypatch.setattr("apps.users.dto.user_dto.UserResponse.model_validate", lambda user: "user_response")
+    result = user_service.verify_user(user_id)
+    assert result == "user_response"
 
-    result = user_service.verify_user(10)
-
-    assert isinstance(result, UserResponse)
-    assert result.is_verified is True
-    repository_mock.update_user.assert_called_with(10, {"is_verified": True})

@@ -19,6 +19,20 @@ class UserService:
 
     def create_user(self, user_data: UserCreateRequest) -> UserCreateResponse:
         UserValidator.validate_user_creation(user_data)
+        tenant_id = user_data.tenant_id
+        if not user_data.is_superuser:
+            if tenant_id is None:
+                raise ExceptionBase(
+                    type_error=ErrorType.TENANT_REQUIRED,
+                    status_code=400,
+                    message="A tenant é obrigatória para usuários não superusuários."
+                )
+            if not self.tenant_repository.get_tenant_by_id(tenant_id):
+                raise ExceptionBase(
+                    type_error=ErrorType.TENANT_NOT_FOUND,
+                    status_code=400,
+                    message=f"Tenant com ID {tenant_id} não encontrado."
+                )
 
         data = user_data.model_dump()
         if data.get("is_superuser"):
@@ -52,12 +66,13 @@ class UserService:
 
     def update_user(self, user_id: int, data: UserUpdateRequest) -> UserResponse:
         UserValidator.validate_user_update(data)
-        user = self.get_user(user_id)
-        for key, value in data.items():
+        user = self.repository.get_user_by_id(user_id)
+        for key, value in data.model_dump(exclude_unset=True).items():
             setattr(user, key, value)
             
         user_updated = self.repository.update_user(user)
         return UserResponse.model_validate(user_updated)
+
 
     def verify_user(self, user_id: int) -> UserResponse:
         request = UserUpdateRequest(is_verified=True)
