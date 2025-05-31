@@ -11,7 +11,7 @@ def map_schema_to_model_dict(schema_obj, model_cls):
         model_fields = set(f.name for f in model_cls._meta.get_fields())
         schema_dict = schema_obj.model_dump()
         filtered = {k: v for k, v in schema_dict.items() if k in model_fields}
-        return model_cls(**filtered)
+        return model_cls(**filtered) 
     except Exception as e:
         raise ExceptionBase(
             type_error=ErrorType.MAPPING_ERROR,
@@ -19,4 +19,5 @@ def map_schema_to_model_dict(schema_obj, model_cls):
             message="Erro ao mapear schema para model",
             details=str(e)
         )
+
 

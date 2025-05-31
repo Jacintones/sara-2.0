@@ -6,6 +6,7 @@ from apps.tenants.models import Tenant, Domain
 from config.core.exception.exception_base import ExceptionBase
 from config.core.exception.error_type import ErrorType
 from apps.tenants.dto.tenant_dto import DomainResponse, TenantCreateRequest, TenantCreatedResponse, TenantListResponse
+from config.core.mapper.mapper_schema import map_schema_to_model_dict
 from utils.validators import BusinessValidator
 
 class TenantService:    
@@ -14,7 +15,8 @@ class TenantService:
         
     def create_tenant(self, data: TenantCreateRequest) -> TenantCreatedResponse:
         """Cria um novo tenant."""
-        tenant = self.repository.create_tenant(data)
+        tenant = map_schema_to_model_dict(data, Tenant)
+        tenant = self.repository.create_tenant(tenant)
         return TenantCreatedResponse.model_validate(tenant)
 
     def list_tenants(self) -> list[TenantListResponse]:

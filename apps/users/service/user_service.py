@@ -19,7 +19,9 @@ class UserService:
 
     def create_user(self, user_data: UserCreateRequest) -> UserCreateResponse:
         UserValidator.validate_user_creation(user_data)
+        tenant = None
         tenant_id = user_data.tenant_id
+
         if not user_data.is_superuser:
             if tenant_id is None:
                 raise ExceptionBase(
@@ -27,7 +29,8 @@ class UserService:
                     status_code=400,
                     message="A tenant é obrigatória para usuários não superusuários."
                 )
-            if not self.tenant_repository.get_tenant_by_id(tenant_id):
+            tenant = self.tenant_repository.get_tenant_by_id(tenant_id)
+            if not tenant:
                 raise ExceptionBase(
                     type_error=ErrorType.TENANT_NOT_FOUND,
                     status_code=400,
@@ -39,10 +42,16 @@ class UserService:
             data["tenant_id"] = None
 
         user_instance = map_schema_to_model_dict(user_data, User)
+        if not user_data.is_superuser:
+            user_instance.tenant = tenant  
+        else:
+            user_instance.tenant = None   
+
         user_instance.password = make_password(user_data.password)
 
         user = self.repository.create_user(user_instance)
         return UserCreateResponse.model_validate(user)
+
 
     def get_user(self, user_id: int) -> UserResponse:
         user = self.repository.get_user_by_id(user_id)

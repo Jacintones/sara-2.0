@@ -1,3 +1,4 @@
+from uuid import UUID
 from ninja import Schema
 from typing import Optional
 from datetime import date, datetime
@@ -23,12 +24,26 @@ class TenantCreateRequest(Schema):
 
 class TenantCreatedResponse(Schema):
     id: int
+    schema_name: str
     name: str
     cnpj: str
+    razao_social: str
+    endereco_comercial: str
+    inscricao_estadual: str
     nome_do_gestor: str
+    rg_gestor: str
+    cpf_gestor: str
+    endereco_residencial: str
+    cargo_gestor: str
+    unidade_executora: str
+    nome_responsavel: str
+    funcao_responsavel: str
+    rg_responsavel: str
+    cpf_responsavel: str
     data_nascimento_gestor: Optional[date] = None
+
     class Config:
-        from_attributes = True  
+        from_attributes = True
 
 class DomainResponse(Schema):
     domain: str
@@ -37,6 +52,7 @@ class DomainResponse(Schema):
         from_attributes = True
 
 class TenantListResponse(Schema):
+    id: int
     schema_name: str
     name: str
     cnpj: str

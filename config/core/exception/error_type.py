@@ -26,6 +26,7 @@ class ErrorType(Enum):
     INVALID_SCHEMA_NAME = "Nome de esquema inválido"
     ERROR_DOMAIN_NOT_FOUND = "Domain não encontrado"
     TENANT_REQUIRED = "Tenant obrigatório"
+    ERROR_GET_TENANT = "Erro ao buscar tenant"
 
     # Erros de Validação
     VALIDATION_ERROR = "validation_error"
@@ -49,3 +50,4 @@ class ErrorType(Enum):
     # Erros de Licença
     ERROR_LICENSE_NOT_FOUND = "Licença não encontrada"
     ERROR_LICENSE_NOT_ACTIVE = "Licença não está ativa"
+    ERROR_GET_LICENSE = "Erro ao buscar licença"

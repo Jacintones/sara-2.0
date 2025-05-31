@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from ninja.errors import ValidationError
 from django.shortcuts import redirect
 from django.urls import path, include
 from jose import JWTError
@@ -84,5 +85,18 @@ def handle_authentication_error(request, exc):
         },
         status=401,
     )
-    
+
+@api.exception_handler(ValidationError)
+def handle_validation_error(request, exc: ValidationError):
+    validation_errors = exc.errors if hasattr(exc, "errors") else str(exc)
+    return api.create_response(
+        request,
+        {
+            "title": ErrorType.VALIDATION_ERROR.value,
+            "message": "Erro de validação nos dados fornecidos.",
+            "status_code": 422,
+            "errors": validation_errors,  
+        },
+        status=422,
+    )
 # endregion

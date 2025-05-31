@@ -19,10 +19,11 @@ class VictimService:
         self.license_repository = license_repository
 
     def create_victim(self, data: VictimCreateRequest) -> VictimCreateResponse:
-        """Cria uma nova vítima."""
         VictimValidator.validate_victim_creation(data)
 
-        license_key = data.license_key
+        victim_dict = data.model_dump()
+        license_key = victim_dict.pop("license_key", None)
+
         license = self.license_repository.get_license_by_key(license_key)
         if not license:
             raise ExceptionBase(
@@ -37,10 +38,8 @@ class VictimService:
                 message="Licença não está ativa"
             )
 
+        victim = map_schema_to_model_dict(data, Victim)  
         license.is_active = False
-        victim_dict = map_schema_to_model_dict(data, Victim)
-
-        victim = Victim(**victim_dict)
         victim.license = license
         victim = self.repository.create_victim(victim, license)
         return VictimCreateResponse.model_validate(victim)

@@ -56,7 +56,8 @@ def check_role(required_roles: Union[RoleEnum, List[RoleEnum]]):
             raise ExceptionBase(
                 type_error=ErrorType.UNAUTHORIZED_ERROR,
                 status_code=403,
-                message="Sem permissão para acessar este recurso"
+                message="Sem permissão para acessar este recurso",
+                details=f"Usuário não possui os roles necessários: {roles}"
             )
             
         return wrapper
