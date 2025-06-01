@@ -7,10 +7,10 @@ from config.core.exception.exception_base import ErrorResponse
 
 tenant_v1_router = Router(tags=["Tenants"])
 
-@tenant_v1_router.post("/", response={200: TenantCreatedResponse, 400: ErrorResponse, 403: ErrorResponse})
+@tenant_v1_router.post("/", response={201: TenantCreatedResponse, 400: ErrorResponse, 403: ErrorResponse})
 @check_role([RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN])
 def create_tenant(request, data: TenantCreateRequest) -> TenantCreatedResponse:
-    return container.tenant_service().create_tenant(data)
+    return 201, container.tenant_service().create_tenant(data)
 
 
 @tenant_v1_router.get("/tenants", response=list[TenantListResponse])

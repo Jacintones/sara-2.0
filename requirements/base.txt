@@ -5,7 +5,7 @@ redis==6.2.0  # https://github.com/redis/redis-py
 hiredis==3.2.1  # https://github.com/redis/hiredis-py
 uvicorn[standard]==0.34.2  # https://github.com/encode/uvicorn
 uvicorn-worker==0.3.0  # https://github.com/Kludex/uvicorn-worker
-
+pydantic[email]==2.11.5  
 # Django
 # ------------------------------------------------------------------------------
 django==5.1.9  # pyup: < 5.2 # https://www.djangoproject.com/
@@ -15,4 +15,8 @@ django-allauth[mfa]==65.8.1  # https://github.com/pennersr/django-allauth
 django-crispy-forms==2.4  # https://github.com/django-crispy-forms/django-crispy-forms
 crispy-bootstrap5==2025.4  # https://github.com/django-crispy-forms/crispy-bootstrap5
 django-redis==5.4.0  # https://github.com/jazzband/django-redis
+django-tenants==3.8.0  # https://github.com/django-tenants/django-tenants
+django-ninja==1.4.1 
 
+#jwt
+python-jose==3.5.0  # https://github.com/mpdavis/python-jose

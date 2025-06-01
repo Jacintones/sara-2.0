@@ -7,12 +7,9 @@ from apps.users.enums.role_enum import RoleEnum
 from apps.accounts.auth.role_checker import check_role
 from apps.tenants.repository.tenant_repository import TenantRepository
 from config.core.exception.exception_base import ErrorResponse
+from config.di import container
 
 router = Router(tags=["Usuários"])
-
-repository = UserRepository()
-tenant_repository = TenantRepository()
-service = UserService(repository=repository, tenant_repository=tenant_repository)
 
 @router.post("/", response={201: UserCreateResponse, 400: ErrorResponse, 403: ErrorResponse})
 @check_role([RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN])
@@ -45,8 +42,8 @@ def create_user(request, user_data: UserCreateRequest) -> UserCreateResponse:
         - O tenant_id é opcional
         - A senha será automaticamente criptografada
     """
-    user = service.create_user(user_data)
-    return 201, user 
+    user = container.user_service.create_user(user_data)
+    return 201, user
 
 @router.get("/{user_id}", response={200: UserResponse, 404: ErrorResponse})
 @check_role([RoleEnum.ADMIN, RoleEnum.USER])
@@ -66,7 +63,7 @@ def get_user(request: HttpRequest, user_id: int) -> UserResponse:
         - Usuários normais só podem ver seus próprios dados
         - Admins podem ver dados de qualquer usuário
     """
-    return service.get_user(user_id)
+    return container.user_service.get_user(user_id)
 
 @router.put("/{user_id}/activate", response={200: UserResponse, 404: ErrorResponse})
 @check_role([RoleEnum.USER])
@@ -85,7 +82,7 @@ def activate_user(request: HttpRequest, user_id: int) -> UserResponse:
         - Este endpoint não requer autenticação
         - Geralmente usado após confirmação de email
     """
-    return service.verify_user(user_id)
+    return container.user_service.verify_user(user_id)
 
 
 @router.put("/{user_id}", response={200: UserResponse, 404: ErrorResponse, 400: ErrorResponse})
@@ -107,4 +104,4 @@ def update_user(request: HttpRequest, user_id: int, user_data: UserUpdateRequest
         - Requer permissão de ADMIN ou SUPER_ADMIN
         - Usuários normais só podem atualizar seus próprios dados
     """
-    return service.update_user(user_id, user_data)
+    return container.user_service.update_user(user_id, user_data)
