@@ -8,7 +8,7 @@ uvicorn-worker==0.3.0  # https://github.com/Kludex/uvicorn-worker
 pydantic[email]==2.11.5  
 # Django
 # ------------------------------------------------------------------------------
-django==5.1.9  # pyup: < 5.2 # https://www.djangoproject.com/
+django==5.2.1  # pyup: < 5.2 # https://www.djangoproject.com/
 django-environ==0.12.0  # https://github.com/joke2k/django-environ
 django-model-utils==5.0.0  # https://github.com/jazzband/django-model-utils
 django-allauth[mfa]==65.8.1  # https://github.com/pennersr/django-allauth
@@ -16,7 +16,7 @@ django-crispy-forms==2.4  # https://github.com/django-crispy-forms/django-crispy
 crispy-bootstrap5==2025.4  # https://github.com/django-crispy-forms/crispy-bootstrap5
 django-redis==5.4.0  # https://github.com/jazzband/django-redis
 django-tenants==3.8.0  # https://github.com/django-tenants/django-tenants
-django-ninja==1.4.1 
+django-ninja==1.4.2 
 
 #jwt
 python-jose==3.5.0  # https://github.com/mpdavis/python-jose
