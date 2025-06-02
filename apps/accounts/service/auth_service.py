@@ -99,5 +99,6 @@ class AuthService:
             raise ExceptionBase(
                 type_error=ErrorType.ERROR_LOGIN,
                 status_code=500,
-                message=str(e)
+                message="Erro ao fazer login",
+                details=str(e)
             )

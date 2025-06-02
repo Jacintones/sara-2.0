@@ -77,6 +77,7 @@ SHARED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.admin",
     "django.forms",
+    "corsheaders",
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -133,6 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -274,5 +276,12 @@ JWT_ALGORITHM = env("JWT_ALGORITHM")
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES = env("JWT_ACCESS_TOKEN_EXPIRE_MINUTES")
 # endregion
 
+# corsheaders
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+
 # Your stuff...
 # ------------------------------------------------------------------------------
+
