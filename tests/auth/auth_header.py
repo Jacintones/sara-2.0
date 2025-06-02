@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from ninja.testing import TestClient
-from apps.accounts.api.v1.auth_v1_api import router as auth_router
+from apps.authenticate.api.v1.auth_v1_api import router as auth_router
 
 @pytest.fixture
 def auth_header(create_test_user):

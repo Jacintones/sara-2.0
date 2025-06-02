@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 from ninja import Schema
 from pydantic import EmailStr
 
@@ -9,14 +10,14 @@ class UserCreateRequest(Schema):
     password: str
     is_superuser: bool
     is_staff: bool
-    tenant_id: int | None
+    client_id: UUID | None
 
 class UserResponse(Schema):
-    id: int
+    id: Optional[UUID] = None
     email: EmailStr
     first_name: str
     last_name: str
-    tenant_id: int | None
+    client_id: UUID | None
     is_verified: bool
     is_active: bool
     is_staff: bool
@@ -33,7 +34,7 @@ class UserUpdateRequest(Schema):
     email: Optional[EmailStr] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    tenant_id: Optional[int] = None
+    client_id: Optional[UUID] = None
     is_verified: Optional[bool] = None
     is_active: Optional[bool] = None
     is_staff: Optional[bool] = None

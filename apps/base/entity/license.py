@@ -3,8 +3,9 @@ import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from apps.base.entity.client import Client
+from apps.base.entity.base import BaseModel
 
-class License(models.Model):
+class License(BaseModel):
     created = models.DateTimeField(_("Criado em"), auto_now_add=True)
     key = models.UUIDField(default=uuid.uuid4, editable=False)
     is_active = models.BooleanField(_("Está ativo"), default=True)

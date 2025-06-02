@@ -1,17 +1,14 @@
 from ninja import Router
-from apps.accounts.dto.auth_dto import LoginRequest, LoginResponse
-from apps.accounts.service.auth_service import AuthService
-from apps.base.repository.user_repository import UserRepository
+from apps.authenticate.dto.auth_dto import LoginRequest, LoginResponse
+from apps.authenticate.service.auth_service import login
 from ninja.errors import AuthenticationError
 from apps.base.core.exception.error_type import ErrorType
 
 router = Router(tags=["Autenticação"])
 
-repository = UserRepository()
-service = AuthService(repository=repository)
 
 @router.post("/login", response={200: LoginResponse, 401: dict, 500: dict}, auth=None)
-def login(request, login_data: LoginRequest):
+def post_login(request, login_data: LoginRequest):
     """
     Realiza o login do usuário e retorna um token JWT.
 
@@ -37,6 +34,6 @@ def login(request, login_data: LoginRequest):
         - Se remember_me for false, o token terá validade de 1 dia
         - O token deve ser enviado no header Authorization como Bearer Token
     """
-    return service.login(login_data)
+    return login(login_data)
 
 

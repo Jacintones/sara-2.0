@@ -1,71 +1,87 @@
 from typing import List
-from apps.base.repository.victim_repository import VictimRepository
 from apps.base.core.exception.exception_base import ExceptionBase
 from apps.base.core.exception.error_type import ErrorType
 from apps.base.dto.victim_dto import (
     VictimCreateRequest, VictimCreateResponse, VictimResponse, 
-    VictimUpdateRequest, VictimUpdateResponse
+    VictimUpdateRequest
 )
-from apps.base.repository.license_repository import LicenseRepository
 from apps.base.entity.victim import Victim
+from apps.base.entity.license import License
 from apps.base.core.mapper.mapper_schema import map_schema_to_model_dict
 from apps.base.validator.victim_validator import VictimValidator
 
-class VictimService:
-    """Serviço para operações com Vítimas."""
 
-    def __init__(self, repository: VictimRepository, license_repository: LicenseRepository):
-        self.repository = repository
-        self.license_repository = license_repository
+def create_victim(data: VictimCreateRequest) -> VictimCreateResponse:
+    VictimValidator.validate_victim_creation(data)
 
-    def create_victim(self, data: VictimCreateRequest) -> VictimCreateResponse:
-        VictimValidator.validate_victim_creation(data)
+    license_key = data.license_key
+    try:
+        license = License.objects.get(key=license_key)
+    except License.DoesNotExist:
+        raise ExceptionBase(
+            type_error=ErrorType.ERROR_LICENSE_NOT_FOUND,
+            status_code=404,
+            message=f"Licença com chave {license_key} não encontrada"
+        )
 
-        victim_dict = data.model_dump()
-        license_key = victim_dict.pop("license_key", None)
+    if not license.is_active:
+        raise ExceptionBase(
+            type_error=ErrorType.ERROR_LICENSE_NOT_ACTIVE,
+            status_code=400,
+            message="Licença não está ativa"
+        )
 
-        license = self.license_repository.get_license_by_key(license_key)
-        if not license:
-            raise ExceptionBase(
-                type_error=ErrorType.ERROR_LICENSE_NOT_FOUND,
-                status_code=404,
-                message=f"Licença com chave {license_key} não encontrada"
-            )
-        if not license.is_active:
-            raise ExceptionBase(
-                type_error=ErrorType.ERROR_LICENSE_NOT_ACTIVE,
-                status_code=400,
-                message="Licença não está ativa"
-            )
+    victim = map_schema_to_model_dict(data, Victim)
+    victim.license = license
+    victim.save()
 
-        victim = map_schema_to_model_dict(data, Victim)  
-        license.is_active = False
-        victim.license = license
-        victim = self.repository.create_victim(victim, license)
-        return VictimCreateResponse.model_validate(victim)
+    license.is_active = False
+    license.save()
+
+    return VictimCreateResponse.model_validate(victim)
 
 
-    def get_victim(self, victim_id: int) -> VictimResponse:
-        """Obtém uma vítima pelo ID."""
-        victim = self.repository.get_victim(victim_id)
-        if not victim:
-            raise ExceptionBase(
-                type_error=ErrorType.ERROR_VICTIM_NOT_FOUND,
-                status_code=404,
-                message=f"Vítima com ID {victim_id} não encontrada"
-            )
-        return VictimResponse.model_validate(victim)
-        
-    def list_victims(self) -> List[VictimResponse]:
-        """Lista todas as vítimas."""
-        victims = self.repository.list_victims()
-        return [VictimResponse.model_validate(victim) for victim in victims]
-            
-    def update_victim(self, victim_id: int, data: VictimUpdateRequest) -> VictimResponse:
-        """Atualiza uma vítima."""
-        victim = self.repository.update_victim(victim_id, data)
-        return VictimResponse.model_validate(victim)
-            
-    def delete_victim(self, victim_id: int) -> None:
-        """Deleta uma vítima."""
-        self.repository.delete_victim(victim_id)
+def get_victim(victim_id: int) -> VictimResponse:
+    try:
+        victim = Victim.objects.get(id=victim_id)
+    except Victim.DoesNotExist:
+        raise ExceptionBase(
+            type_error=ErrorType.ERROR_VICTIM_NOT_FOUND,
+            status_code=404,
+            message=f"Vítima com ID {victim_id} não encontrada"
+        )
+    return VictimResponse.model_validate(victim)
+
+
+def list_victims() -> List[VictimResponse]:
+    victims = Victim.objects.all()
+    return [VictimResponse.model_validate(v) for v in victims]
+
+
+def update_victim(victim_id: int, data: VictimUpdateRequest) -> VictimResponse:
+    try:
+        victim = Victim.objects.get(id=victim_id)
+    except Victim.DoesNotExist:
+        raise ExceptionBase(
+            type_error=ErrorType.ERROR_VICTIM_NOT_FOUND,
+            status_code=404,
+            message=f"Vítima com ID {victim_id} não encontrada"
+        )
+
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(victim, key, value)
+
+    victim.save()
+    return VictimResponse.model_validate(victim)
+
+
+def delete_victim(victim_id: int) -> None:
+    try:
+        victim = Victim.objects.get(id=victim_id)
+    except Victim.DoesNotExist:
+        raise ExceptionBase(
+            type_error=ErrorType.ERROR_VICTIM_NOT_FOUND,
+            status_code=404,
+            message=f"Vítima com ID {victim_id} não encontrada"
+        )
+    victim.delete()

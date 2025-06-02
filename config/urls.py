@@ -10,10 +10,10 @@ from ninja import NinjaAPI
 from ninja.errors import AuthenticationError
 
 from apps.base.api.v1 import user_v1_router, client_v1_router, license_v1_router, victim_v1_router
-from apps.accounts.api.v1 import auth_router
+from apps.authenticate.api.v1 import auth_router
 from apps.base.core.exception.exception_base import ExceptionBase
 from apps.base.core.exception.error_type import ErrorType
-from apps.accounts.auth.jwt_handler import JWTAuth
+from apps.authenticate.auth.jwt_handler import JWTAuth
 
 api = NinjaAPI(
     version="1.0",
@@ -56,30 +56,6 @@ def service_unavailable(request, exc: ExceptionBase):
             "details": exc.details
         },
         status=exc.status_code,
-    )
-
-@api.exception_handler(IntegrityError)
-def handle_integrity_error(request, exc: IntegrityError):
-    return api.create_response(
-        request,
-        {
-            "title": ErrorType.INTEGRTY_ERROR,
-            "message": "Erro de integridade no banco de dados. Verifique se as chaves estrangeiras existem.",
-            "status_code": 400
-        },
-        status=400,
-    )
-
-@api.exception_handler(AuthenticationError)
-def handle_authentication_error(request, exc):
-    return api.create_response(
-        request,
-        {
-            "title": ErrorType.UNAUTHORIZED_ERROR.value,
-            "message": str(exc),
-            "status_code": 401
-        },
-        status=401,
     )
 
 @api.exception_handler(ValidationError)

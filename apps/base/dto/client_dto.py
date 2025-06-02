@@ -22,7 +22,7 @@ class ClientCreateRequest(Schema):
     data_nascimento_gestor: Optional[date] = None
 
 class ClientCreatedResponse(Schema):
-    id: int
+    id: UUID
     name: str
     cnpj: str
     razao_social: str
@@ -44,7 +44,7 @@ class ClientCreatedResponse(Schema):
         from_attributes = True
 
 class ClientListResponse(Schema):
-    id: int
+    id: UUID
     name: str
     cnpj: str
     razao_social: str

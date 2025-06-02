@@ -2,8 +2,10 @@ import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from apps.base.entity.base import BaseModel
 
-class Client(models.Model):  
+
+class Client(BaseModel):  
     name = models.CharField(_("Nome Fantasia"), max_length=100)
     razao_social = models.CharField(_("Razão Social"), max_length=255, default='')
     cnpj = models.CharField(_("CNPJ"), max_length=18, unique=True)

@@ -1,4 +1,6 @@
 from typing import Optional
+from uuid import UUID
+
 from ninja import Schema
 from pydantic import EmailStr
 
@@ -10,7 +12,7 @@ class LoginRequest(Schema):
 
 class LoginResponse(Schema):
     access_token: str
-    user_id: int
+    user_id: UUID
     email: str
     first_name: str
     last_name: str

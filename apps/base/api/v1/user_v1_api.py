@@ -1,16 +1,18 @@
+from uuid import UUID
 from django.http import HttpRequest
 from ninja import Router
 from apps.base.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest
 from apps.base.enum.role_enum import RoleEnum
-from apps.accounts.auth.role_checker import check_role
-from apps.base.core.exception.exception_base import ErrorResponse
-from apps.base.di import container
+from apps.authenticate.auth.role_checker import check_role
+from apps.base.core.exception.exception_base import ErrorResponse, ExceptionBase
+from apps.base.service.user_service import create_user, get_user, update_user, verify_user
+from apps.base.core.exception.error_type import ErrorType
 
 user_v1_router = Router(tags=["Usuários"])
 
 @user_v1_router.post("/", response={201: UserCreateResponse, 400: ErrorResponse, 403: ErrorResponse})
 @check_role([RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN])
-def create_user(request, user_data: UserCreateRequest) -> UserCreateResponse:
+def create(request, user_data: UserCreateRequest) -> UserCreateResponse:
     """
     Cria um novo usuário no sistema.
 
@@ -39,12 +41,12 @@ def create_user(request, user_data: UserCreateRequest) -> UserCreateResponse:
         - O client_id é opcional
         - A senha será automaticamente criptografada
     """
-    user = container.user_service.create_user(user_data)
+    user = create_user(user_data)
     return 201, user
 
 @user_v1_router.get("/{user_id}", response={200: UserResponse, 404: ErrorResponse})
 @check_role([RoleEnum.ADMIN, RoleEnum.USER])
-def get_user(request: HttpRequest, user_id: int) -> UserResponse:
+def get_by_id(request: HttpRequest, user_id: UUID) -> UserResponse:
     """
     Obtém os dados de um usuário específico.
 
@@ -60,7 +62,14 @@ def get_user(request: HttpRequest, user_id: int) -> UserResponse:
         - Usuários normais só podem ver seus próprios dados
         - Admins podem ver dados de qualquer usuário
     """
-    return container.user_service.get_user(user_id)
+    if not request.user.is_superuser and user_id != request.user.id:
+        raise ExceptionBase(
+            type_error=ErrorType.UNAUTHORIZED_ERROR,
+            status_code=403,
+            message="Você não tem permissão para acessar os dados deste usuário."
+        )
+
+    return get_user(user_id)
 
 @user_v1_router.put("/{user_id}/activate", response={200: UserResponse, 404: ErrorResponse})
 @check_role([RoleEnum.USER])
@@ -79,12 +88,12 @@ def activate_user(request: HttpRequest, user_id: int) -> UserResponse:
         - Este endpoint não requer autenticação
         - Geralmente usado após confirmação de email
     """
-    return container.user_service.verify_user(user_id)
+    return verify_user(user_id)
 
 
 @user_v1_router.put("/{user_id}", response={200: UserResponse, 404: ErrorResponse, 400: ErrorResponse})
 @check_role([RoleEnum.SUPER_ADMIN])
-def update_user(request: HttpRequest, user_id: int, user_data: UserUpdateRequest) -> UserResponse:
+def update(request: HttpRequest, user_id: int, user_data: UserUpdateRequest) -> UserResponse:
     """
     Atualiza os dados de um usuário existente.
 
@@ -101,4 +110,4 @@ def update_user(request: HttpRequest, user_id: int, user_data: UserUpdateRequest
         - Requer permissão de ADMIN ou SUPER_ADMIN
         - Usuários normais só podem atualizar seus próprios dados
     """
-    return container.user_service.update_user(user_id, user_data)
+    return update_user(user_id, user_data)

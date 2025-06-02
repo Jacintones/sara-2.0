@@ -11,12 +11,9 @@ from apps.base.enum.victim_enum import (
     EducationLevel, Occupation, WorkStatus, Income,
     Children, Deficiency, DrugUsage, FederatedUnit, AggressionSource
 )
+from apps.base.entity.base import BaseModel
 
-class BaseModel(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created = models.DateTimeField(_("created"), auto_now_add=True)
-    class Meta:
-        abstract = True
+
 
 class Victim(BaseModel):
     license = models.OneToOneField("base.License", verbose_name=_("Licença"), on_delete=models.PROTECT, null=True, blank=True)
@@ -48,7 +45,7 @@ class Victim(BaseModel):
     has_consulted_psychiatrist = models.BooleanField(_('Já foi atendido por psiquiatra e/ou psicólogo?'))
     drug_usage = models.CharField(_('Faz uso de drogas ilícitas?'), choices=DrugUsage.choices, max_length=2)
 
-class Aggression(models.Model):
+class Aggression(BaseModel):
     acknowledge = models.BooleanField(_('Confirmar'), default=False)
     type = models.CharField(
         choices=AggressionSource.choices,

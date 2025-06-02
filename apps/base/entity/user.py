@@ -10,6 +10,7 @@ from apps.base.manager.user_manager import CustomUserManager
 from apps.base.entity.client import Client
 
 class User(AbstractUser):
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     username = None
     email = models.EmailField(_("email address"), blank=True, unique=True, null=False)
     client = models.ForeignKey(
