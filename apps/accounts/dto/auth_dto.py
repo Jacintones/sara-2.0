@@ -18,6 +18,5 @@ class LoginResponse(Schema):
     is_active: bool
     is_staff: bool
     is_superuser: bool
-    redirect_url: Optional[str] = None 
     class Config:
         from_attributes = True 

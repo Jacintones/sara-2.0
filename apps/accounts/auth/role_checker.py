@@ -1,8 +1,8 @@
 from functools import wraps
 from typing import List, Union
-from apps.users.enums.role_enum import RoleEnum
-from config.core.exception.exception_base import ExceptionBase
-from config.core.exception.error_type import ErrorType
+from apps.base.enum.role_enum import RoleEnum
+from apps.base.core.exception.exception_base import ExceptionBase
+from apps.base.core.exception.error_type import ErrorType
 
 logger = __import__('logging').getLogger(__name__)
 

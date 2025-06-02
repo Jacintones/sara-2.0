@@ -5,18 +5,14 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from ninja.errors import ValidationError
 from django.shortcuts import redirect
 from django.urls import path, include
-from jose import JWTError
 from psycopg import IntegrityError
 from ninja import NinjaAPI
 from ninja.errors import AuthenticationError
 
-from apps.users.api.v1 import  user_router
-from apps.tenants.api.v1 import tenant_v1_router, license_v1_router
+from apps.base.api.v1 import user_v1_router, client_v1_router, license_v1_router, victim_v1_router
 from apps.accounts.api.v1 import auth_router
-from apps.victims.api.v1 import victim_router
-from config.core.exception.exception_base import ExceptionBase
-from config.core.custom_api import CustomNinjaAPI
-from config.core.exception.error_type import ErrorType
+from apps.base.core.exception.exception_base import ExceptionBase
+from apps.base.core.exception.error_type import ErrorType
 from apps.accounts.auth.jwt_handler import JWTAuth
 
 api = NinjaAPI(
@@ -28,10 +24,10 @@ api = NinjaAPI(
 )
 
 api.add_router("/auth", auth_router)
-api.add_router("/users", user_router)
-api.add_router("/tenants", tenant_v1_router)
+api.add_router("/users", user_v1_router)
+api.add_router("/clients", client_v1_router)
 api.add_router("/licenses", license_v1_router)
-api.add_router("/victims", victim_router)
+api.add_router("/victims", victim_v1_router)
 
 urlpatterns = [
     path("admin/", admin.site.urls),

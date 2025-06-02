@@ -1,8 +1,8 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, UTC
 from config.settings import base
-from config.core.exception.exception_base import ExceptionBase
-from config.core.exception.error_type import ErrorType
+from apps.base.core.exception.exception_base import ExceptionBase
+from apps.base.core.exception.error_type import ErrorType
 from typing import Dict, Optional
 from ninja.security import HttpBearer
 

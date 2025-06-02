@@ -1,9 +1,9 @@
 from ninja import Router
 from apps.accounts.dto.auth_dto import LoginRequest, LoginResponse
 from apps.accounts.service.auth_service import AuthService
-from apps.users.repository.user_repository import UserRepository
+from apps.base.repository.user_repository import UserRepository
 from ninja.errors import AuthenticationError
-from config.core.exception.error_type import ErrorType
+from apps.base.core.exception.error_type import ErrorType
 
 router = Router(tags=["Autenticação"])
 

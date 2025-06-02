@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = BASE_DIR / "sara_portal"
 env = environ.Env()
 
-READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=True)
+READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
 if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
     env.read_env(str(BASE_DIR / ".env"))
@@ -48,8 +48,9 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 DATABASES = {
     "default": env.db("DATABASE_URL")
 }
-DATABASES["default"]["ENGINE"] = "django_tenants.postgresql_backend"
+DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
+
 
 
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
@@ -65,32 +66,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 # APPS
 # ------------------------------------------------------------------------------
 # Shared apps (apenas no schema "public")
-SHARED_APPS = [
-    "django_tenants",  
-    "apps.users",
-    "apps.tenants",  
-    "apps.accounts",
+INSTALLED_APPS = [
+    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.admin",
     "django.forms",
     "corsheaders",
-
     "crispy_forms",
     "crispy_bootstrap5",
     "ninja",
+    "apps.base",
+    "apps.accounts"
 ]
-
-TENANT_APPS = [
-    "apps.victims",
-]
-
-# Django requer que estas estejam em INSTALLED_APPS também:
-INSTALLED_APPS =  SHARED_APPS + TENANT_APPS
-
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------
@@ -104,7 +94,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "base.User"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "users:redirect"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
@@ -141,9 +131,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django_tenants.middleware.main.TenantMainMiddleware",
-    "config.core.middleware.jwt_middleware.JWTAuthMiddleware",
-    "config.core.middleware.tenant_middleware.TenantMiddleware",
+    "apps.base.core.middleware.jwt_middleware.JWTAuthMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -264,12 +252,7 @@ LOGGING = {
 REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 REDIS_SSL = REDIS_URL.startswith("rediss://")
 
-#region django-tenants
-TENANT_MODEL = "tenants.Tenant"
-TENANT_DOMAIN_MODEL = "tenants.Domain"
-DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
-SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
-#endregion
+
 # region JWT
 JWT_SECRET_KEY = env("JWT_SECRET_KEY")
 JWT_ALGORITHM = env("JWT_ALGORITHM")

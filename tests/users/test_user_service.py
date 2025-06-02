@@ -1,14 +1,11 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from config.core.exception.exception_base import ExceptionBase
-from config.core.exception.error_type import ErrorType
+from apps.base.core.exception.exception_base import ExceptionBase
+from apps.base.core.exception.error_type import ErrorType
 
-from apps.users.service.user_service import UserService
-from apps.users.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest
-
-# Supondo que existe uma função que mapeia o schema para dict/model
-from config.core.mapper.mapper_schema import map_schema_to_model_dict
+from apps.base.service.user_service import UserService
+from apps.base.dto.user_dto import UserCreateRequest, UserCreateResponse, UserResponse, UserUpdateRequest
 
 @pytest.fixture
 def mock_user_repository():
@@ -31,7 +28,7 @@ def test_create_user_superuser(user_service, mock_user_repository, mock_tenant_r
     mock_user_repository.create_user.return_value = mock_user
 
     monkeypatch.setattr("apps.users.validators.user_validator.UserValidator.validate_user_creation", lambda x: None)
-    monkeypatch.setattr("config.core.mapper.mapper_schema.map_schema_to_model_dict", lambda data, model: mock_user)
+    monkeypatch.setattr("base.core.mapper.mapper_schema.map_schema_to_model_dict", lambda data, model: mock_user)
     monkeypatch.setattr("django.contrib.auth.hashers.make_password", lambda pwd: "hashed_"+pwd)
     monkeypatch.setattr("apps.users.dto.user_dto.UserCreateResponse.model_validate", lambda user: "usercreate_response")
 
