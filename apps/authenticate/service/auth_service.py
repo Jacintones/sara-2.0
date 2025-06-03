@@ -43,6 +43,7 @@ def login(data: LoginRequest) -> LoginResponse:
         payload = {
             "sub": str(user.id),
             "email": user.email,
+            "client_id": str(user.client_id) if user.client_id else None,
             "roles": {
                 "is_superuser": user.is_superuser,
                 "is_staff": user.is_staff

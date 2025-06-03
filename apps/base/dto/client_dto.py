@@ -61,6 +61,7 @@ class ClientListResponse(Schema):
     rg_responsavel: str
     cpf_responsavel: str
     data_nascimento_gestor: Optional[date] = None
+    
     class Config:
         from_attributes = True
 

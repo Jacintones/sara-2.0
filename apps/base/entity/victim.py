@@ -12,11 +12,12 @@ from apps.base.enum.victim_enum import (
     Children, Deficiency, DrugUsage, FederatedUnit, AggressionSource
 )
 from apps.base.entity.base import BaseModel
+from apps.base.entity.license import License
 
 
 
 class Victim(BaseModel):
-    license = models.OneToOneField("base.License", verbose_name=_("Licença"), on_delete=models.PROTECT, null=True, blank=True)
+    license = models.OneToOneField(License, verbose_name=_("Licença"), on_delete=models.PROTECT, null=True, blank=True)
     name = models.CharField(_('Nome'), max_length=48)
     social_name = models.CharField(_('Nome Social'), max_length=48, blank=True, null=True)
     cpf = models.CharField(_('CPF'), max_length=14, unique=True)

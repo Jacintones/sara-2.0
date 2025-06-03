@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 from apps.base.core.exception.exception_base import ExceptionBase
 from apps.base.core.exception.error_type import ErrorType
 from apps.base.dto.victim_dto import (
@@ -85,3 +86,7 @@ def delete_victim(victim_id: int) -> None:
             message=f"Vítima com ID {victim_id} não encontrada"
         )
     victim.delete()
+
+def get_victims_by_client(client_id: UUID) -> List[VictimResponse]:
+    victims = Victim.objects.filter(license__client_id=client_id)
+    return [VictimResponse.model_validate(v) for v in victims] if victims else []
